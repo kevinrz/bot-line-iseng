@@ -52,7 +52,7 @@ public class BotIsengApplication extends SpringBootServletInitializer {
     public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
         System.out.println("\n------\nJALAN handleTextEvent???????\n------\n");
         System.out.println("TOKEN:");
-        System.out.println(messageEvent.getReplyToken(););
+        System.out.println(messageEvent.getReplyToken());
         String pesan = messageEvent.getMessage().getText().toLowerCase();
         String[] pesanSplit = pesan.split(" ");
         if (pesanSplit[0].equals("apakah")) {
