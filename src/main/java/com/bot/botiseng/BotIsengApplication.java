@@ -39,6 +39,7 @@ public class BotIsengApplication extends SpringBootServletInitializer {
     private LineMessagingClient lineMessagingClient;
 
     public static void main(String[] args) {
+        System.out.println("\nJALAN MAIN\n");
         SpringApplication.run(BotIsengApplication.class, args);
     }
 
@@ -49,6 +50,7 @@ public class BotIsengApplication extends SpringBootServletInitializer {
 
     @EventMapping
     public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
+        System.out.printf("\n------\nJALAN handleTextEvent\n------\n");
         String pesan = messageEvent.getMessage().getText().toLowerCase();
         String[] pesanSplit = pesan.split(" ");
         if (pesanSplit[0].equals("apakah")) {
@@ -59,6 +61,7 @@ public class BotIsengApplication extends SpringBootServletInitializer {
     }
 
     private String getRandomJawaban() {
+        System.out.printf("\n------\nJALAN getRandomJawaban\n------\n");
         String jawaban = "";
         int random = new Random().nextInt();
         if (random % 2 == 0) {
@@ -70,6 +73,7 @@ public class BotIsengApplication extends SpringBootServletInitializer {
     }
 
     private void balasChatDenganRandomJawaban(String replyToken, String jawaban) {
+        System.out.printf("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
 
         TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
         try {
