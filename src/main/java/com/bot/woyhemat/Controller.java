@@ -43,18 +43,31 @@ public class Controller{
     @Autowired
     private LineMessagingClient lineMessagingClient;
 
+    private FacadeNotifikasi notif = new FacadeNotifikasi();
+
     @EventMapping
+    // Inti dari bales pesannya disini
     public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
-        System.out.println("\n------\nJALAN handleTextEvent???????\n------\n");
-        System.out.println("TOKEN:");
-        System.out.println(messageEvent.getReplyToken());
+//        System.out.println("\n------\nJALAN handleTextEvent???????\n------\n");
+//        System.out.println("TOKEN:");
+//        System.out.println(messageEvent.getReplyToken());
+//        String pesan = messageEvent.getMessage().getText().toLowerCase();
+
+//        String[] pesanSplit = pesan.split(" ");
+//        if (pesanSplit[0].equals("apakah")) {
+//            String jawaban = getRandomJawaban();
+//            String replyToken = messageEvent.getReplyToken();
+//            balasChatDenganRandomJawaban(replyToken, jawaban);
+//        }
+
         String pesan = messageEvent.getMessage().getText().toLowerCase();
-        String[] pesanSplit = pesan.split(" ");
-        if (pesanSplit[0].equals("apakah")) {
-            String jawaban = getRandomJawaban();
-            String replyToken = messageEvent.getReplyToken();
-            balasChatDenganRandomJawaban(replyToken, jawaban);
-        }
+        String replyToken = messageEvent.getReplyToken();
+        String jawaban = "test";
+        notif.balasChatDenganRandomJawaban(replyToken, jawaban);
+
+
+
+
     }
 
     private String getRandomJawaban() {
@@ -69,17 +82,17 @@ public class Controller{
         return jawaban;
     }
 
-    private void balasChatDenganRandomJawaban(String replyToken, String jawaban) {
-//        System.out.println("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
-
-        TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
-        try {
-            lineMessagingClient
-                    .replyMessage(new ReplyMessage(replyToken, jawabanDalamBentukTextMessage))
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Ada error saat ingin membalas chat");
-        }
-    }
+//    private void balasChatDenganRandomJawaban(String replyToken, String jawaban) {
+////        System.out.println("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
+//
+//        TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
+//        try {
+//            lineMessagingClient
+//                    .replyMessage(new ReplyMessage(replyToken, jawabanDalamBentukTextMessage))
+//                    .get();
+//        } catch (InterruptedException | ExecutionException e) {
+//            System.out.println("Ada error saat ingin membalas chat");
+//        }
+//    }
 
 }
