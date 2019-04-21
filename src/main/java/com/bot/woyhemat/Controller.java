@@ -70,7 +70,7 @@ public class Controller{
         String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
         balasChat(replyToken, jawaban);
     }
-    
+
 //    @GetMapping("/register")
 //    public String cv() {
 //        return "haha";
@@ -90,16 +90,20 @@ public class Controller{
         }
     }
 
-    @GetMapping(value="/", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value="/register", produces = MediaType.TEXT_PLAIN_VALUE)
     public String index() {
 
-        return "This is Home page";
+        return "This is register page";
     }
 
     @GetMapping(value="/hello", produces = MediaType.TEXT_PLAIN_VALUE)
     public String sayHello() {
-
-        return "Hello there!";
+        repoUser.findAll();
+        String respon = "";
+        for (User x : repoUser.findAll()) {
+            respon += x.toString();
+        }
+        return respon;
     }
 
 }
