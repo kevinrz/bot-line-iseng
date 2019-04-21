@@ -2,7 +2,7 @@ package com.bot.woyhemat.handler;
 
 import java.util.Observable;
 import java.util.Observer;
-
+import com.bot.woyhemat.database.*;
 public class AktivitasHandler extends Handler {
 
 
@@ -22,7 +22,7 @@ public class AktivitasHandler extends Handler {
      */
     void tambahPengeluaran() {
         //TODO
-        
+
 
 
     }

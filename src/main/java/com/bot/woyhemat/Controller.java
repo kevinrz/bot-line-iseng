@@ -19,6 +19,9 @@ package com.bot.woyhemat;
 //        }
 
 
+import com.bot.woyhemat.database.User;
+import com.bot.woyhemat.database.UserRepository;
+import com.bot.woyhemat.handler.AktivitasHandler;
 import com.bot.woyhemat.handler.Handler;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
@@ -32,7 +35,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
@@ -40,20 +46,33 @@ import java.util.concurrent.ExecutionException;
 @LineMessageHandler
 @org.springframework.stereotype.Controller
 public class Controller{
+    @Autowired
+    UserRepository repoUser;
+    private ArrayList<User> userCoba = new ArrayList<>();
+
 
     @Autowired
     private LineMessagingClient lineMessagingClient;
 
     private FacadeNotifikasi notif = new FacadeNotifikasi();
-    private Handler aktivitasHandler = new
+    private Handler aktivitasHandler = new AktivitasHandler();
 
     @EventMapping
     // Inti dari bales pesannya disini
     public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
         String pesan = messageEvent.getMessage().getText().toLowerCase();
         String replyToken = messageEvent.getReplyToken();
+        User coba = new User(pesan, 3000, 200);
+        repoUser.save(coba);
         String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
         balasChat(replyToken, jawaban);
+    }
+
+    @GetMapping("/register")
+    public String cv() {
+        return "haha";
+
+
     }
 
     private void balasChat(String replyToken, String jawaban) {
