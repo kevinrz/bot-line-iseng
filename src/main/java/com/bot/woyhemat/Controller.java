@@ -35,7 +35,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,12 +70,17 @@ public class Controller{
         balasChat(replyToken, jawaban);
     }
 
-    @GetMapping("/register")
-    public String cv() {
-        return "haha";
+    @GetMapping(value="/hello", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String sayHello() {
 
-
+        return "Hello there!";
     }
+//    @GetMapping("/register")
+//    public String cv() {
+//        return "haha";
+//
+//
+//    }
 
     private void balasChat(String replyToken, String jawaban) {
 
