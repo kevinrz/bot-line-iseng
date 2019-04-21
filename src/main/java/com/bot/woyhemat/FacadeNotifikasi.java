@@ -14,6 +14,11 @@ public class FacadeNotifikasi {
 
     public void balasChatDenganRandomJawaban(String replyToken, String jawaban) {
 //        System.out.println("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
+        System.out.println();
+        System.out.println();
+        System.out.println("JALAN YOOOOOO facadee");
+        System.out.println();
+        System.out.println();
 
         TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
         try {
