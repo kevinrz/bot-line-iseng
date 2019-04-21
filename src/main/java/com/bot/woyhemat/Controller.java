@@ -42,7 +42,7 @@ public class Controller{
 
     @Autowired
     private LineMessagingClient lineMessagingClient;
-    
+
     @EventMapping
     public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
         System.out.println("\n------\nJALAN handleTextEvent???????\n------\n");
