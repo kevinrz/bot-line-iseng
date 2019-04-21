@@ -62,10 +62,8 @@ public class Controller{
 
         String pesan = messageEvent.getMessage().getText().toLowerCase();
         String replyToken = messageEvent.getReplyToken();
-        String jawaban = "test";
-        notif.balasChatDenganRandomJawaban(replyToken, jawaban);
-
-
+        String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
+        balasChat(replyToken, jawaban);
 
 
     }
@@ -82,17 +80,17 @@ public class Controller{
         return jawaban;
     }
 
-//    private void balasChatDenganRandomJawaban(String replyToken, String jawaban) {
-////        System.out.println("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
-//
-//        TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
-//        try {
-//            lineMessagingClient
-//                    .replyMessage(new ReplyMessage(replyToken, jawabanDalamBentukTextMessage))
-//                    .get();
-//        } catch (InterruptedException | ExecutionException e) {
-//            System.out.println("Ada error saat ingin membalas chat");
-//        }
-//    }
+    private void balasChat(String replyToken, String jawaban) {
+//        System.out.println("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
+
+        TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
+        try {
+            lineMessagingClient
+                    .replyMessage(new ReplyMessage(replyToken, jawabanDalamBentukTextMessage))
+                    .get();
+        } catch (InterruptedException | ExecutionException e) {
+            System.out.println("Ada error saat ingin membalas chat");
+        }
+    }
 
 }
