@@ -19,6 +19,7 @@ package com.bot.woyhemat;
 //        }
 
 
+import com.bot.woyhemat.handler.Handler;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
@@ -44,44 +45,18 @@ public class Controller{
     private LineMessagingClient lineMessagingClient;
 
     private FacadeNotifikasi notif = new FacadeNotifikasi();
+    private Handler aktivitasHandler = new
 
     @EventMapping
     // Inti dari bales pesannya disini
     public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
-//        System.out.println("\n------\nJALAN handleTextEvent???????\n------\n");
-//        System.out.println("TOKEN:");
-//        System.out.println(messageEvent.getReplyToken());
-//        String pesan = messageEvent.getMessage().getText().toLowerCase();
-
-//        String[] pesanSplit = pesan.split(" ");
-//        if (pesanSplit[0].equals("apakah")) {
-//            String jawaban = getRandomJawaban();
-//            String replyToken = messageEvent.getReplyToken();
-//            balasChatDenganRandomJawaban(replyToken, jawaban);
-//        }
-
         String pesan = messageEvent.getMessage().getText().toLowerCase();
         String replyToken = messageEvent.getReplyToken();
         String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
         balasChat(replyToken, jawaban);
-
-
-    }
-
-    private String getRandomJawaban() {
-//        System.out.println("\n------\nJALAN getRandomJawaban\n------\n");
-        String jawaban = "";
-        int random = new Random().nextInt();
-        if (random % 2 == 0) {
-            jawaban = "Ya";
-        } else {
-            jawaban = "Nggak";
-        }
-        return jawaban;
     }
 
     private void balasChat(String replyToken, String jawaban) {
-//        System.out.println("\n------\nJALAN balasChatDenganRandomJawaban\n------\n");
 
         TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
         try {
