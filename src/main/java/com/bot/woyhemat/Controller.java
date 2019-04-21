@@ -47,6 +47,7 @@ import java.util.concurrent.ExecutionException;
 
 @LineMessageHandler
 @org.springframework.stereotype.Controller
+@RestController
 public class Controller{
     @Autowired
     UserRepository repoUser;
@@ -69,12 +70,7 @@ public class Controller{
         String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
         balasChat(replyToken, jawaban);
     }
-
-    @GetMapping(value="/hello", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String sayHello() {
-
-        return "Hello there!";
-    }
+    
 //    @GetMapping("/register")
 //    public String cv() {
 //        return "haha";
@@ -92,6 +88,18 @@ public class Controller{
         } catch (InterruptedException | ExecutionException e) {
             System.out.println("Ada error saat ingin membalas chat");
         }
+    }
+
+    @GetMapping(value="/", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String index() {
+
+        return "This is Home page";
+    }
+
+    @GetMapping(value="/hello", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String sayHello() {
+
+        return "Hello there!";
     }
 
 }
