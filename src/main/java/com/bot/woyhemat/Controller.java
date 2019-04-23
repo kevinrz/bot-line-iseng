@@ -29,7 +29,7 @@ public class Controller {
     @Autowired
     DebtRepository repoDebt;
 
-    Handler utangHandler = new UtangHandler();
+    UtangHandler utangHandler = new UtangHandler();
 
     public Controller() {
         //create handler objects
@@ -38,6 +38,8 @@ public class Controller {
     @EventMapping
     public void messageEventHandleText(MessageEvent<TextMessageContent> event) {
         System.out.println("JALAN OI");
+
+        // Mendapatkan UserId akun LINE
         String userId = event.getSource().getUserId();
 
         TextMessageContent message = event.getMessage();
@@ -59,21 +61,15 @@ public class Controller {
 
         if (splitMessageString[0].equals("/utang")) {
             String balasan = "User " + userId + " ngutang " + splitMessageString[1];
+            tambahUtang(Integer.parseInt(splitMessageString[1]), new Date(), userId);
 
-            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId).get(0));
-            repoDebt.save(utang);
+//            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId).get(0));
+//            repoDebt.save(utang);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
         if (splitMessageString[0].equals("/lihatutang")) {
-            String balasan = "";
-
-            for (Debt debt : repoDebt.findAll()) {
-                if (debt.getUser().getUsername().equals(userId)) {
-                    balasan += "userId: " + debt.getUser().getUsername() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
-                }
-            }
-
+            String balasan = utangHandler.getUtangUser(userId);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
@@ -89,9 +85,10 @@ public class Controller {
 
     public void tambahUtang(int jumlah, Date waktu, String username) {
         User theUser = (User) repoUser.findByUsername(username);
-        UtangHandler utangHandlerObj = (UtangHandler) utangHandler;
+        UtangHandler utangHandlerObj = utangHandler;
         utangHandlerObj.tambahUtang(jumlah, waktu, theUser);
     }
+
 
     public void setTarget(int jumlah) {
         //TODO

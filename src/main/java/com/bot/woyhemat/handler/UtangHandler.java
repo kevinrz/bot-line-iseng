@@ -27,12 +27,15 @@ public class UtangHandler extends Handler {
         debtRepo.save(utang);
     }
 
-    @GetMapping(value="/hello", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String getAllUtang() {
-        String respon = "";
-        for (Debt x : debtRepo.findAll()) {
-            respon += x.getAmount() + " " + x.getPeriod() + "\n";
+    public String getUtangUser(String userId) {
+        String balasan = "[Utang] : ";
+        for (Debt debt : debtRepo.findAll()) {
+            if (debt.getUser().getUsername().equals(userId)) {
+                balasan += "userId: " + debt.getUser().getUsername() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
+            }
         }
-        return respon;
+        return balasan;
     }
+
+
 }
