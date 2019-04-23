@@ -13,7 +13,6 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -70,9 +69,9 @@ public class Controller {
             String balasan = "";
 
             for (Debt debt : repoDebt.findAll()) {
-//                if (debt.getUser().equals(userId)) {
-                balasan += "user: " + debt.getUser() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
-//                }
+                if (debt.getUser().getUsername().equals(userId)) {
+                    balasan += "user: " + debt.getUser() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
+                }
             }
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
@@ -91,7 +90,7 @@ public class Controller {
     public void tambahUtang(int jumlah, Date waktu, String username) {
         User theUser = (User) repoUser.findByUsername(username);
         UtangHandler utangHandlerObj = (UtangHandler) utangHandler;
-        utangHandlerObj.tambahUtang(jumlah, waktu, theUser );
+        utangHandlerObj.tambahUtang(jumlah, waktu, theUser);
     }
 
     public void setTarget(int jumlah) {
