@@ -14,7 +14,6 @@ public class WoyHematApplication extends SpringBootServletInitializer {
 	}
 
 	public static void main(String[] args) {
-		System.out.println("JALAN MAIN NIH !");
 		SpringApplication.run(WoyHematApplication.class, args);
 	}
 

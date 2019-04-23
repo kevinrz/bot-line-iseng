@@ -1,28 +1,9 @@
 package com.bot.woyhemat;
 
-//handlers
-
-//public Controller(){
-//        //create handler objects
-//        }
-//
-//public void tambahAktivitas(int jumlah){
-//        //TODO
-//        }
-//
-//public void tambahUtang(int jumlah, int masaLenggang){
-//        //TODO
-//        }
-//
-//public void setTarget(int jumlah){
-//        //TODO
-//        }
-
-
 import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.UserRepository;
-import com.bot.woyhemat.handler.AktivitasHandler;
 import com.bot.woyhemat.handler.Handler;
+import com.bot.woyhemat.handler.UtangHandler;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
@@ -31,79 +12,60 @@ import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-
+import java.util.Date;
 
 @LineMessageHandler
-@org.springframework.stereotype.Controller
-@RestController
-public class Controller{
+public class Controller {
+    //handlers
+    @Autowired
+    LineMessagingClient lineMessagingClient;
+
     @Autowired
     UserRepository repoUser;
-    private ArrayList<User> userCoba = new ArrayList<>();
 
+    Handler utangHandler = new UtangHandler();
 
-    @Autowired
-    private LineMessagingClient lineMessagingClient;
-
-    private FacadeNotifikasi notif = new FacadeNotifikasi();
-    private Handler aktivitasHandler = new AktivitasHandler();
+    public Controller() {
+        //create handler objects
+    }
 
     @EventMapping
-    // Inti dari bales pesannya disini
-    public void handleTextEvent(MessageEvent<TextMessageContent> messageEvent) {
-        String pesan = messageEvent.getMessage().getText().toLowerCase();
-        String replyToken = messageEvent.getReplyToken();
-        User coba = new User(pesan, 3000, 200);
-        repoUser.save(coba);
-        String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
-        balasChat(replyToken, jawaban);
-    }
+    public void messageEventHandleText(MessageEvent<TextMessageContent> event) {
+        System.out.println("JALAN OI");
+        String userId = event.getSource().getUserId();
 
-//    @GetMapping("/register")
-//    public String cv() {
-//        return "haha";
-//
-//
-//    }
+        TextMessageContent message = event.getMessage();
+        String messageString = message.getText().toLowerCase();
+        String[] splitMessageString = messageString.split(";");
 
-    private void balasChat(String replyToken, String jawaban) {
+        if (splitMessageString[0].equals("/register")) {
+            String balasan = "User " + splitMessageString[1] + " ditambahkan, UserId: " + userId;
 
-        TextMessage jawabanDalamBentukTextMessage = new TextMessage(jawaban);
-        try {
-            lineMessagingClient
-                    .replyMessage(new ReplyMessage(replyToken, jawabanDalamBentukTextMessage))
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Ada error saat ingin membalas chat");
+            User coba = new User(userId, Integer.parseInt(splitMessageString[2]), 0);
+            repoUser.save(coba);
+            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
+
+
+//        String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
+//        balasChat(replyToken, jawaban);
+
+//        lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage("Hello!")));
     }
 
-    @GetMapping(value="/register", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String index() {
-
-        return "This is register page";
+    public void tambahAktivitas(int jumlah) {
+        //TODO
     }
 
-    @GetMapping(value="/hello", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String sayHello() {
-        repoUser.findAll();
-        String respon = "";
-        for (User x : repoUser.findAll()) {
-            respon += x.toString();
-        }
-        return respon;
+    public void tambahUtang(int jumlah, Date waktu, String username) {
+        User theUser = (User) repoUser.findByUsername(username);
+        UtangHandler utangHandlerObj = (UtangHandler) utangHandler;
+        utangHandlerObj.tambahUtang(jumlah, waktu, theUser );
+    }
+
+    public void setTarget(int jumlah) {
+        //TODO
     }
 
 }

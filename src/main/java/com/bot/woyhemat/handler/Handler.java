@@ -3,8 +3,6 @@ package com.bot.woyhemat.handler;
 import java.util.List;
 import java.util.Observer;
 
-import com.bot.woyhemat.database.*;
-
 public abstract class Handler {
     List<Observer> observer;
     
