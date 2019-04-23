@@ -1,5 +1,7 @@
 package com.bot.woyhemat;
 
+import com.bot.woyhemat.database.Debt;
+import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.UserRepository;
 import com.bot.woyhemat.handler.Handler;
@@ -11,6 +13,7 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -23,6 +26,9 @@ public class Controller {
 
     @Autowired
     UserRepository repoUser;
+
+    @Autowired
+    DebtRepository repoDebt;
 
     Handler utangHandler = new UtangHandler();
 
@@ -47,11 +53,30 @@ public class Controller {
         if (splitMessageString[0].equals("/register")) {
             String balasan = "User " + splitMessageString[1] + " ditambahkan, UserId: " + userId;
 
-            User coba = new User(userId, Integer.parseInt(splitMessageString[2]), 0);
-            repoUser.save(coba);
+            User user = new User(userId, Integer.parseInt(splitMessageString[2]), 0);
+            repoUser.save(user);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
+        if (splitMessageString[0].equals("/utang")) {
+            String balasan = "User " + userId + " ngutang " + splitMessageString[1];
+
+            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId));
+            repoDebt.save(utang);
+            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
+        }
+
+        if (splitMessageString[0].equals("/lihatutang")) {
+            String balasan = "";
+
+            for (Debt debt : repoDebt.findAll()) {
+                if (debt.getUser().equals(userId)) {
+                    balasan += "user: " + debt.getUser() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
+                }
+            }
+
+            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
+        }
 
 //        String jawaban = notif.balasChatDenganRandomJawaban("sesuatu");
 //        balasChat(replyToken, jawaban);
