@@ -84,7 +84,7 @@ public class Controller {
     }
 
     public void tambahUtang(int jumlah, Date waktu, String username) {
-        User theUser = (User) repoUser.findByUsername(username);
+        User theUser = (User) repoUser.findByUsername(username).get(0);
         UtangHandler utangHandlerObj = utangHandler;
         utangHandlerObj.tambahUtang(jumlah, waktu, theUser);
     }
