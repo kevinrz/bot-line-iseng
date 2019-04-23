@@ -61,7 +61,7 @@ public class Controller {
         if (splitMessageString[0].equals("/utang")) {
             String balasan = "User " + userId + " ngutang " + splitMessageString[1];
 
-            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId));
+            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId).get(0));
             repoDebt.save(utang);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
