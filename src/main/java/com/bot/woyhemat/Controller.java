@@ -38,6 +38,9 @@ public class Controller {
         TextMessageContent message = event.getMessage();
         String messageString = message.getText().toLowerCase();
         String[] splitMessageString = messageString.split(";");
+        System.out.println("\n==================");
+        System.out.println(messageString);
+        System.out.println("==================\n");
 
         if (splitMessageString[0].equals("/register")) {
             String balasan = "User " + splitMessageString[1] + " ditambahkan, UserId: " + userId;
