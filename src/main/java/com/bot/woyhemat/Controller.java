@@ -40,6 +40,8 @@ public class Controller {
         String[] splitMessageString = messageString.split(";");
         System.out.println("\n==================");
         System.out.println(messageString);
+        System.out.println("<><>");
+        System.out.println(splitMessageString[0]);
         System.out.println("==================\n");
 
         if (splitMessageString[0].equals("/register")) {
