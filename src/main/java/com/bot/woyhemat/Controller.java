@@ -70,9 +70,9 @@ public class Controller {
             String balasan = "";
 
             for (Debt debt : repoDebt.findAll()) {
-                if (debt.getUser().equals(userId)) {
-                    balasan += "user: " + debt.getUser() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
-                }
+//                if (debt.getUser().equals(userId)) {
+                balasan += "user: " + debt.getUser() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
+//                }
             }
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
