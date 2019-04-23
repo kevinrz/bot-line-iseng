@@ -2,6 +2,7 @@ package com.bot.woyhemat;
 
 import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
+import com.bot.woyhemat.database.UserRepository;
 import com.bot.woyhemat.handler.UtangHandler;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,33 +19,38 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class WoyHematApplicationTests {
-	UtangHandler utangHandler;
+    UtangHandler utangHandler;
 
-	@Autowired
-	DebtRepository repoUtang;
+    @Autowired
+    DebtRepository repoUtang;
+
+    @Autowired
+    UserRepository repoUser;
+
+    @Before
+    public void setUp() {
+        utangHandler = new UtangHandler();
+
+        repoUser.save(new User("12345", 200, 300));
+    }
 
 
-	@Before
-	public void setUp() {
-		utangHandler = new UtangHandler();
+    @Test
+    public void contextLoads() {
+    }
 
-	}
+    @Test
+    public void testTambahUtangWork() {
+        utangHandler.tambahUtang(200, new Date(), repoUser.findByUsername("12345").get(0), repoUtang);
 
 
-	@Test
-	public void contextLoads() {
-	}
+        assertNotNull(repoUtang.findAll());
+    }
 
-	@Test
-	public void testTambahUtangWork() {
-		utangHandler.tambahUtang(200, new Date(), new User("12345", 200, 300), repoUtang);
-		assertNotNull(repoUtang.findAll());
-	}
-
-	@Test
-	public void testGetUtang() {
-		utangHandler.tambahUtang(200, new Date(), new User("12345", 200, 300), repoUtang);
-		assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0,7));
-	}
+    @Test
+    public void testGetUtang() {
+        utangHandler.tambahUtang(200, new Date(), repoUser.findByUsername("12345").get(0), repoUtang);
+        assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0, 7));
+    }
 
 }
