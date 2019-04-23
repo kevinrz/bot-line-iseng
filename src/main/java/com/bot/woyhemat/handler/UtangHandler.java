@@ -13,8 +13,7 @@ import java.util.Date;
 @RestController
 public class UtangHandler extends Handler {
 
-    @Autowired
-    DebtRepository debtRepo;
+
 
     @Override
     void notifyFacadeNotif() {
@@ -22,14 +21,14 @@ public class UtangHandler extends Handler {
     }
 
 
-    public void tambahUtang(int amount, Date period, User user) {
+    public void tambahUtang(int amount, Date period, User user, DebtRepository repo) {
         Debt utang = new Debt(amount, period, user);
-        debtRepo.save(utang);
+        repo.save(utang);
     }
 
-    public String getUtangUser(String userId) {
+    public String getUtangUser(String userId, DebtRepository repo) {
         String balasan = "[Utang] : ";
-        for (Debt debt : debtRepo.findAll()) {
+        for (Debt debt : repo.findAll()) {
             if (debt.getUser().getUsername().equals(userId)) {
                 balasan += "userId: " + debt.getUser().getUsername() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
             }

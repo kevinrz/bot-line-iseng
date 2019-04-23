@@ -61,7 +61,7 @@ public class Controller {
 
         if (splitMessageString[0].equals("/utang")) {
             String balasan = "User " + userId + " ngutang " + splitMessageString[1];
-            tambahUtang(Integer.parseInt(splitMessageString[1]), new Date(), userId);
+            tambahUtang(Integer.parseInt(splitMessageString[1]), new Date(), userId, repoDebt);
 
 //            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId).get(0));
 //            repoDebt.save(utang);
@@ -69,7 +69,7 @@ public class Controller {
         }
 
         if (splitMessageString[0].equals("/lihatutang")) {
-            String balasan = utangHandler.getUtangUser(userId);
+            String balasan = utangHandler.getUtangUser(userId, repoDebt);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
@@ -83,10 +83,10 @@ public class Controller {
         //TODO
     }
 
-    public void tambahUtang(int jumlah, Date waktu, String username) {
+    public void tambahUtang(int jumlah, Date waktu, String username, DebtRepository repo) {
         User theUser = (User) repoUser.findByUsername(username).get(0);
         UtangHandler utangHandlerObj = utangHandler;
-        utangHandlerObj.tambahUtang(jumlah, waktu, theUser);
+        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, repo);
     }
 
 
