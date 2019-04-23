@@ -70,7 +70,7 @@ public class Controller {
 
             for (Debt debt : repoDebt.findAll()) {
                 if (debt.getUser().getUsername().equals(userId)) {
-                    balasan += "user: " + debt.getUser() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
+                    balasan += "userId: " + debt.getUser().getUsername() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
                 }
             }
 
