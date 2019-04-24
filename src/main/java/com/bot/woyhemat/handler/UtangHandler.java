@@ -16,7 +16,7 @@ public class UtangHandler extends Handler {
 
 
     @Override
-    void notifyFacadeNotif() {
+    public void notifyFacadeNotif() {
 
     }
 

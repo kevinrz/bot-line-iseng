@@ -53,4 +53,9 @@ public class WoyHematApplicationTests {
         assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0, 7));
     }
 
+    @Test
+    public void testNotify() {
+        utangHandler.notifyFacadeNotif();
+    }
+
 }
