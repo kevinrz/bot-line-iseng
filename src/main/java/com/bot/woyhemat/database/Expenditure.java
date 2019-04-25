@@ -26,4 +26,19 @@ public class Expenditure {
         this.amount = amount;
         this.user = user;
     }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
 }

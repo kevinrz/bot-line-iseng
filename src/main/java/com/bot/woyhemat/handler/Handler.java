@@ -1,11 +1,12 @@
 package com.bot.woyhemat.handler;
 
 import java.util.List;
+import java.util.Observable;
 import java.util.Observer;
 
 public abstract class Handler {
     List<Observer> observer;
-    
+
     /**
 
      Belum ada FacadeNotifikasi untuk di notify.

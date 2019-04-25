@@ -3,9 +3,6 @@ package com.bot.woyhemat.handler;
 import com.bot.woyhemat.database.Debt;
 import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
@@ -27,8 +24,10 @@ public class UtangHandler extends Handler {
     }
 
     public String getUtangUser(String userId, DebtRepository repo) {
+        System.out.println("jalan getUtanguser");
         String balasan = "[Utang] : ";
         for (Debt debt : repo.findAll()) {
+            System.out.println("Loop getUtangUser");
             if (debt.getUser().getUsername().equals(userId)) {
                 balasan += "userId: " + debt.getUser().getUsername() + " amount: " + debt.getAmount() + " period: " + debt.getPeriod() + " ; ";
             }

@@ -11,51 +11,52 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class WoyHematApplicationTests {
-    UtangHandler utangHandler;
+	UtangHandler utangHandler;
 
-    @Autowired
-    DebtRepository repoUtang;
+	@Autowired
+	DebtRepository repoUtang;
 
-    @Autowired
-    UserRepository repoUser;
+	@Autowired
+	UserRepository repoUser;
 
-    @Before
-    public void setUp() {
-        utangHandler = new UtangHandler();
+	@Before
+	public void setUp() {
+		utangHandler = new UtangHandler();
 
-        repoUser.save(new User("12345", 200, 300));
-    }
-
-
-    @Test
-    public void contextLoads() {
-    }
-
-    @Test
-    public void testTambahUtangWork() {
-        utangHandler.tambahUtang(200, new Date(), repoUser.findByUsername("12345").get(0), repoUtang);
+		repoUser.save(new User("12345", 200, 300));
+	}
 
 
-        assertNotNull(repoUtang.findAll());
-    }
+	@Test
+	public void contextLoads() {
+	}
 
-    @Test
-    public void testGetUtang() {
-        utangHandler.tambahUtang(200, new Date(), repoUser.findByUsername("12345").get(0), repoUtang);
-        assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0, 7));
-    }
+	@Test
+	public void testTambahUtangWork() {
+		utangHandler.tambahUtang(200, new Date(), repoUser.findById(1).get(), repoUtang);
+		String reportUtang = utangHandler.getUtangUser(repoUser.findByUsername("12345").getUsername(), repoUtang);
 
-    @Test
-    public void testNotify() {
-        utangHandler.notifyFacadeNotif();
-    }
+
+		assertNotNull(reportUtang);
+	}
+
+	@Test
+	public void testGetUtang() {
+		utangHandler.tambahUtang(200, new Date(), repoUser.findById(1).get(), repoUtang);
+		assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0, 7));
+	}
+
+	@Test
+	public void testNotify() {
+		utangHandler.notifyFacadeNotif();
+	}
 
 }
