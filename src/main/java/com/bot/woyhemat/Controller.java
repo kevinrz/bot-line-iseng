@@ -23,6 +23,7 @@ public class Controller {
     @Autowired
     LineMessagingClient lineMessagingClient;
 
+    // REFACTOR THIS
     AktivitasHandler aktivitasHandler = new AktivitasHandler();
     LaporanHandler laporanHandler = new LaporanHandler();
     UtangHandler utangHandler = new UtangHandler();
@@ -60,16 +61,22 @@ public class Controller {
         } else if (splitMessageString[0].equals("target")) {
             String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]));
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
-        } else if (splitMessageString[0].equals("utang")) {
-            System.out.println("masuk utang");
+        }
+        // utang <jumlah>
+        // utang 5000
+        else if (splitMessageString[0].equals("utang")) {
+            System.out.println("masuk utang"); // LOG
             String balasan = "User " + userId + " ngutang " + splitMessageString[1];
             tambahUtang(Integer.parseInt(splitMessageString[1]), new Date(), userId, repoDebt);
 
 //            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId).get(0));
 //            repoDebt.save(utang);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
-        } else if (splitMessageString[0].equals("lihatutang")) {
-            System.out.println("masuk lihatutang");
+        }
+
+        // lihatutang
+        else if (splitMessageString[0].equals("lihatutang")) {
+            System.out.println("masuk lihatutang"); // LOG
             String balasan = utangHandler.getUtangUser(userId, repoDebt);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         } else {
@@ -103,9 +110,10 @@ public class Controller {
         return "Anda telah terdaftar!";
     }
 
-    //
+    // method yang dijalankan ketika menambahkan utang ke suatu user
+    // method ini menggunakan utangHandler
     public void tambahUtang(int jumlah, Date waktu, String username, DebtRepository repo) {
-        System.out.println("JALAN TAMBAH UTANG");
+        System.out.println("JALAN TAMBAH UTANG"); // LOG
         User theUser = userRepo.findByUsername(username);
         UtangHandler utangHandlerObj = utangHandler;
         utangHandlerObj.tambahUtang(jumlah, waktu, theUser, repo);
