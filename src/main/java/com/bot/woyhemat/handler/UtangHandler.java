@@ -29,8 +29,8 @@ public class UtangHandler extends Handler {
      * @param user   objek user yang berhutang
      * @param repo   repository objek yang di pass dari Controller
      */
-    public void tambahUtang(int amount, Date period, User user, DebtRepository repo) {
-        Debt utang = new Debt(amount, period, user);
+    public void tambahUtang(int amount, Date period, User user, String keterangan, DebtRepository repo) {
+        Debt utang = new Debt(amount, period, user, keterangan);
         repo.save(utang);
     }
 
@@ -51,12 +51,18 @@ public class UtangHandler extends Handler {
             String tanggalJatuhTempoString = dateToString(debt.getPeriod());
 
             if (debt.getUser().getUsername().equals(userId)) {
-                balasan += counter +  ") Jumlah: " + debt.getAmount() + "\n Jatuh Tempo: " + tanggalJatuhTempoString + " \n";
+                balasan += counter +  ") Jumlah: " + debt.getAmount() + "\n Jatuh Tempo: " + tanggalJatuhTempoString +
+                        " \n Keterangan: " + debt.getKeterangan() + "\n";
             }
             counter++;
         }
         return balasan;
     }
+
+
+
+
+
 
     /**
      * Mengubah object Date jadi string dengan pola dd-mm-yyyy

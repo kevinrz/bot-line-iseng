@@ -88,8 +88,8 @@ import java.util.Date;
             String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]));
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
-        // utang <jumlah> <Deadline utang dalma hari>
-        // utang 5000 5
+        // utang <jumlah> <Deadline utang dalma hari> <keterangan>
+        // utang 5000 5 ke paijo
         else if (splitMessageString[0].equals("utang")) {
             System.out.println("masuk utang"); // LOG
 //            String balasan = "User " + userId + " ngutang " + splitMessageString[1];
@@ -102,7 +102,11 @@ import java.util.Date;
 
             String balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
                     + splitMessageString[2] + " hari.";
-            tambahUtang(Integer.parseInt(splitMessageString[1]),tanggalDate, userId, repoDebt);
+            
+
+            String keterangan =getKeteranganUtang(splitMessageString);
+
+            tambahUtang(Integer.parseInt(splitMessageString[1]),tanggalDate, userId, keterangan, repoDebt);
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
@@ -123,6 +127,16 @@ import java.util.Date;
     // Convert LocalDate to Date
     public static Date asDate(LocalDate localDate) {
         return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    // Mendapatkan keterangan utang
+    public String getKeteranganUtang(String[] string) {
+        String hasil = "";
+        for (int i = 3; i < string.length; i++) {
+            hasil += string[i] + " ";
+        }
+
+        return hasil;
     }
 
 
@@ -155,11 +169,11 @@ import java.util.Date;
 
     // method yang dijalankan ketika menambahkan utang ke suatu user
     // method ini menggunakan utangHandler
-    public void tambahUtang(int jumlah, Date waktu, String username, DebtRepository repo) {
+    public void tambahUtang(int jumlah, Date waktu, String username, String keterangan, DebtRepository repo) {
         System.out.println("JALAN TAMBAH UTANG"); // LOG
         User theUser = userRepo.findByUsername(username);
         UtangHandler utangHandlerObj = utangHandler;
-        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, repo);
+        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, keterangan, repo);
     }
 
 
