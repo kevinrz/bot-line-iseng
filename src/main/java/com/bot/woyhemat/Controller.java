@@ -97,7 +97,7 @@ import java.util.Date;
 
 
             LocalDate tanggal = LocalDate.now();
-            tanggal = tanggal.plusDays(splitMessageString[2]);
+            tanggal = tanggal.plusDays(Integer.parseInt(splitMessageString[2]));
             Date tanggalDate = asDate(tanggal);
 
             String balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
