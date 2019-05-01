@@ -101,8 +101,8 @@ import java.util.Date;
             Date tanggalDate = asDate(tanggal);
 
             String balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
-                    + splitMessageString[2] + " hari.";
-            
+                    + splitMessageString[2] + " hari, tulis 'lihatutang' tanpa tanda kutip untuk melihat semua utang";
+
 
             String keterangan =getKeteranganUtang(splitMessageString);
 
