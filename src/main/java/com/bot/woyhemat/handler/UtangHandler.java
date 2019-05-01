@@ -44,27 +44,28 @@ public class UtangHandler extends Handler {
     public String getUtangUser(String userId, DebtRepository repo) {
         System.out.println("jalan getUtanguser"); // LOG
         String balasan = "[Utang] : \n";
-
+        int counter = 1;
         for (Debt debt : repo.findAll()) {
             System.out.println("Loop getUtangUser"); // LOG
 
             String tanggalJatuhTempoString = dateToString(debt.getPeriod());
 
             if (debt.getUser().getUsername().equals(userId)) {
-                balasan += "- Jumlah: " + debt.getAmount() + ", Jatuh Tempo: " + tanggalJatuhTempoString + " \n";
+                balasan += counter +  ") Jumlah: " + debt.getAmount() + "\n Jatuh Tempo: " + tanggalJatuhTempoString + " \n";
             }
+            counter++;
         }
         return balasan;
     }
 
     /**
      * Mengubah object Date jadi string dengan pola dd-mm-yyyy
+     *
      * @param date object date yang akan diubah
      * @return string date yang sudah diubah
      */
     public String dateToString(Date date) {
-        String hasil = new SimpleDateFormat("yyyy-MM-dd").format(date);
-
+        String hasil = new SimpleDateFormat("dd-MM-yyyy").format(date);
         return hasil;
     }
 
