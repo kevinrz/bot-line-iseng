@@ -16,6 +16,8 @@ import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 @LineMessageHandler
@@ -87,14 +89,18 @@ import java.util.Date;
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
         // utang <jumlah>
-        // utang 5000
+        // utang 5000 5hari
         else if (splitMessageString[0].equals("utang")) {
             System.out.println("masuk utang"); // LOG
             String balasan = "User " + userId + " ngutang " + splitMessageString[1];
-            tambahUtang(Integer.parseInt(splitMessageString[1]), new Date(), userId, repoDebt);
 
-//            Debt utang = new Debt(Integer.parseInt(splitMessageString[1]), new Date(), (User) repoUser.findByUsername(userId).get(0));
-//            repoDebt.save(utang);
+
+            LocalDate tanggal = LocalDate.now();
+            tanggal = tanggal.plusDays(10);
+            Date tanggalDate = asDate(tanggal);
+
+            tambahUtang(Integer.parseInt(splitMessageString[1]),tanggalDate, userId, repoDebt);
+
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
@@ -109,6 +115,11 @@ import java.util.Date;
         }
 
 
+    }
+
+    // Convert LocalDate to Date
+    public static Date asDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
 
 
