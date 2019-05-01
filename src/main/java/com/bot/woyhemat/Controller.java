@@ -88,17 +88,20 @@ import java.util.Date;
             String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]));
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
-        // utang <jumlah>
-        // utang 5000 5hari
+        // utang <jumlah> <Deadline utang dalma hari>
+        // utang 5000 5
         else if (splitMessageString[0].equals("utang")) {
             System.out.println("masuk utang"); // LOG
-            String balasan = "User " + userId + " ngutang " + splitMessageString[1];
+//            String balasan = "User " + userId + " ngutang " + splitMessageString[1];
+
 
 
             LocalDate tanggal = LocalDate.now();
-            tanggal = tanggal.plusDays(10);
+            tanggal = tanggal.plusDays(splitMessageString[2]);
             Date tanggalDate = asDate(tanggal);
 
+            String balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
+                    + splitMessageString[2] + " hari.";
             tambahUtang(Integer.parseInt(splitMessageString[1]),tanggalDate, userId, repoDebt);
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));

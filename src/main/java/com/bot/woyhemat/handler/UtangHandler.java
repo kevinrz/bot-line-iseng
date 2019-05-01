@@ -4,6 +4,7 @@ import com.bot.woyhemat.database.Debt;
 import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -46,11 +47,25 @@ public class UtangHandler extends Handler {
 
         for (Debt debt : repo.findAll()) {
             System.out.println("Loop getUtangUser"); // LOG
+
+            String tanggalJatuhTempoString = dateToString(debt.getPeriod());
+
             if (debt.getUser().getUsername().equals(userId)) {
-                balasan += "- Jumlah: " + debt.getAmount() + ", Jatuh Tempo: " + debt.getPeriod() + " \n";
+                balasan += "- Jumlah: " + debt.getAmount() + ", Jatuh Tempo: " + tanggalJatuhTempoString + " \n";
             }
         }
         return balasan;
+    }
+
+    /**
+     * Mengubah object Date jadi string dengan pola dd-mm-yyyy
+     * @param date object date yang akan diubah
+     * @return string date yang sudah diubah
+     */
+    public String dateToString(Date date) {
+        String hasil = new SimpleDateFormat("yyyy-MM-dd").format(date);
+
+        return hasil;
     }
 
 
