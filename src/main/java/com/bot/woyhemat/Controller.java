@@ -21,28 +21,32 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @LineMessageHandler
- public class Controller {
+public class Controller {
+    @Autowired
+    public UserRepository userRepo;
+    @Autowired
+    public DebtRepository repoDebt;
+    @Autowired
+    public ExpenditureRepository expenses;
     //handlers
     @Autowired
     LineMessagingClient lineMessagingClient;
-
     // REFACTOR THIS
     AktivitasHandler aktivitasHandler = new AktivitasHandler();
     LaporanHandler laporanHandler = new LaporanHandler();
     UtangHandler utangHandler = new UtangHandler();
-
-    @Autowired
-    public UserRepository  userRepo;
-
-    @Autowired
-    public DebtRepository repoDebt;
-
-    @Autowired
-    public ExpenditureRepository expenses;
-
     @Autowired
     ExpenditureRepository expenseRepo;
 
+    /**
+     * Convert localDate to Date object
+     *
+     * @param localDate objek yang akan di convert
+     * @return Date hasil konversi
+     */
+    public static Date asDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+    }
 
     @EventMapping
     public void messageEventHandleText(MessageEvent<TextMessageContent> event) {
@@ -54,7 +58,7 @@ import java.util.Date;
         System.out.println(messageString); //LOG
         System.out.println(splitMessageString[0]); //LOG
         if (splitMessageString[0].equals("daftar")) {
-            String reply = newUser(userId, Integer.parseInt(splitMessageString[1]),userRepo);
+            String reply = newUser(userId, Integer.parseInt(splitMessageString[1]), userRepo);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
         } else if (splitMessageString[0].equals("tambah") && splitMessageString[1].equals("pengeluaran")) {
@@ -89,24 +93,19 @@ import java.util.Date;
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
         // utang <jumlah> <Deadline utang dalma hari> <keterangan>
-        // utang 5000 5 ke paijo
+        // utang 5000 5 aqua ke paijo
         else if (splitMessageString[0].equals("utang")) {
             System.out.println("masuk utang"); // LOG
-//            String balasan = "User " + userId + " ngutang " + splitMessageString[1];
-
-
-
-            LocalDate tanggal = LocalDate.now();
-            tanggal = tanggal.plusDays(Integer.parseInt(splitMessageString[2]));
-            Date tanggalDate = asDate(tanggal);
+            LocalDate tanggalNow = LocalDate.now(); // Mengambil tanggal sekarang
+            tanggalNow = tanggalNow.plusDays(Integer.parseInt(splitMessageString[2])); // Menambahkan tanggal sekarang dengan waktu jatuh tempo
+            Date tanggalDate = asDate(tanggalNow); // Mengubah object LocalDate ke Date agar bisa masuk ke repository
 
             String balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
                     + splitMessageString[2] + " hari, tulis 'lihatutang' tanpa tanda kutip untuk melihat semua utang";
 
+            String keterangan = getKeteranganUtang(splitMessageString);
 
-            String keterangan =getKeteranganUtang(splitMessageString);
-
-            tambahUtang(Integer.parseInt(splitMessageString[1]),tanggalDate, userId, keterangan, repoDebt);
+            tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt);
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
@@ -124,12 +123,13 @@ import java.util.Date;
 
     }
 
-    // Convert LocalDate to Date
-    public static Date asDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-    }
-
-    // Mendapatkan keterangan utang
+    /**
+     * Mengambil keterangan utang dari pesan,
+     * misal utang 300 5 beli aqua dari paijo belom bayar
+     *
+     * @param string array pesan yang sudah di split
+     * @return akan me return string "beli aqua dari paijo belom bayar"
+     */
     public String getKeteranganUtang(String[] string) {
         String hasil = "";
         for (int i = 3; i < string.length; i++) {
@@ -141,14 +141,13 @@ import java.util.Date;
 
 
     //+pengeluaran template = tambah pengeluaran *kategori* *amount* *deskripsi*
-    
+
     public String tambahAktivitas(String userId, String kategori, int jumlah, String deskripsi, UserRepository repoU, ExpenditureRepository repoE) {
-        if(repoU.findByUsername(userId) == null) {
+        if (repoU.findByUsername(userId) == null) {
             return "Maaf Anda belom terdaftar";
-        }
-        else {
+        } else {
             User thisUser = repoU.findByUsername(userId);
-            aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi,thisUser,repoE);
+            aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, repoE);
             return "Pengeluaran berhasil di tambah";
 
         }
@@ -156,15 +155,15 @@ import java.util.Date;
 
     // register template : daftar *target*
     // eg daftar 1000000
-    public String newUser(String userId, int target, UserRepository repo){
-        if(repo.findByUsername(userId) != null){
+    public String newUser(String userId, int target, UserRepository repo) {
+        if (repo.findByUsername(userId) != null) {
 
-            return "Maaf Anda sudah terdaftar";    
+            return "Maaf Anda sudah terdaftar";
         } else {
-            User newUser = new User(userId,target,0);
+            User newUser = new User(userId, target, 0);
             repo.save(newUser);
             return "Anda telah terdaftar!";
-        }     
+        }
     }
 
     // method yang dijalankan ketika menambahkan utang ke suatu user
@@ -191,16 +190,15 @@ import java.util.Date;
                 "- daftar\n";
     }
 
-    public String infoTambah(){
+    public String infoTambah() {
         return "Cara menggunakan fitur tambah:\n" +
                 "*kategogori* *jumlahuang* *deskripsi";
     }
-    public String infoUtang(){
+
+    public String infoUtang() {
         return "Cara menggunakan fitur Utang:\n" +
                 "*kategogori* *jumlahuang* *deskripsi";
     }
-
-
 
 
     public String salah() {
@@ -214,7 +212,7 @@ import java.util.Date;
         return "Anda telah menentukan target pengeluaran sebesar " + jumlah;
     }
 
-    public String kategori(){
+    public String kategori() {
         return "Pilih satu kategori: \n - Makanan \n - Hiburan \n - Lainnya  \n Seterusnya ketik *kategori yang dipilih* *total pengeluaran* *deskripsi*";
     }
 
