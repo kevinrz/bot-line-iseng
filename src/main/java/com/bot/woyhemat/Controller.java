@@ -200,11 +200,14 @@ public class Controller {
 
         // Jika tidak belum terdaftar, return null
         if (theUser == null) {
+            System.out.println("USER NULL"); // LOG
             return false;
         }
 
         UtangHandler utangHandlerObj = utangHandler;
         utangHandlerObj.tambahUtang(jumlah, waktu, theUser, keterangan, repoDebt);
+        System.out.println("USER NOT NULL"); // LOG
+        System.out.println(theUser);
         return true;
     }
 
