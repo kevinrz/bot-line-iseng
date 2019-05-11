@@ -38,6 +38,11 @@ public class Controller {
     @Autowired
     ExpenditureRepository expenseRepo;
 
+    // Buat di Test
+    @Autowired
+    Controller control;
+
+
     /**
      * Convert localDate to Date object
      *
@@ -50,6 +55,8 @@ public class Controller {
 
     @EventMapping
     public void messageEventHandleText(MessageEvent<TextMessageContent> event) {
+
+
         System.out.println("JALAN OI"); //LOG
         String userId = event.getSource().getUserId();
         TextMessageContent message = event.getMessage();
@@ -90,8 +97,10 @@ public class Controller {
             }
 
         } else if (splitMessageString[0].equals("info")) {
+
             String reply = info();
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
+            System.out.println("#" + reply + "#");
 
 
         } else if (splitMessageString[0].equals("laporan")) {
@@ -106,7 +115,7 @@ public class Controller {
         // utang 5000 5 aqua ke paijo
         else if (splitMessageString[0].equals("utang")) {
             System.out.println("masuk utang"); // LOG
-            String balasan = "";
+            String balasan;
 
             // Verify input
             if (!utangInputVerifier(splitMessageString)) {
@@ -130,6 +139,7 @@ public class Controller {
                             + splitMessageString[2] + " hari, tulis 'lihatutang' tanpa tanda kutip untuk melihat semua utang";
                 }
             }
+            System.out.println("#" + balasan + "#");
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
@@ -137,6 +147,7 @@ public class Controller {
         else if (splitMessageString[0].equals("lihatutang") && splitMessageString.length == 1) {
             System.out.println("masuk lihatutang"); // LOG
             String balasan = utangHandler.getUtangUser(userId, repoDebt);
+            System.out.println("#" + balasan + "#");
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         } else if (splitMessageString[0].equals("histori")) {
             System.out.println("histori"); //Log

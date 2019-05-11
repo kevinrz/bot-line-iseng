@@ -18,12 +18,6 @@ public class Debt {
 
     protected Debt() {}
 
-    public Debt(int amount, Date period, User user) {
-        this.amount = amount;
-        this.period = period;
-        this.user = user;
-        this.keterangan = "-";
-    }
 
     public Debt(int amount, Date period, User user, String keterangan) {
         this.amount = amount;
@@ -69,7 +63,7 @@ public class Debt {
         return keterangan;
     }
 
-    public void setKeterangan(String keterangan) {
-        this.keterangan = keterangan;
-    }
+//    public void setKeterangan(String keterangan) {
+//        this.keterangan = keterangan;
+//    }
 }
