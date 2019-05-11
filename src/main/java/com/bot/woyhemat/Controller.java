@@ -122,13 +122,11 @@ public class Controller {
 
             Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt, userRepo);
 
-            System.out.println("ADA USER " + adaUser); // LOG
-            if (adaUser) {
+            if (!adaUser) {
                 balasan = "Maaf, anda belum terdaftar";
             }
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
-            System.out.println("ADA USER " + adaUser); // LOG
         }
 
         // lihatutang
