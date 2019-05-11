@@ -4,11 +4,7 @@ import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.ExpenditureRepository;
 import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.UserRepository;
-import com.bot.woyhemat.handler.AktivitasHandler;
-import com.bot.woyhemat.handler.HistoriHandler;
-import com.bot.woyhemat.handler.LaporanHandler;
-import com.bot.woyhemat.handler.UtangHandler;
-import com.bot.woyhemat.handler.NotifikasiHandler;
+import com.bot.woyhemat.handler.*;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
@@ -80,16 +76,15 @@ public class Controller {
             for (int i = 2; i < splitMessageString.length; i++) {
                 deskripsi += splitMessageString[i];
             }
-            if(kondisiTarget==false){
+            if (kondisiTarget == false) {
                 String reply = tambahAktivitas(userId, kategori, jumlah, deskripsi, userRepo, expenses);
                 String reply1 = targetLebih();
                 lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
-                if(kondisiTarget==true) {
+                if (kondisiTarget == true) {
                     lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply1)));
                 }
-            }
-            else{
+            } else {
                 String reply1 = targetLebih();
                 lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply1)));
             }
@@ -115,22 +110,29 @@ public class Controller {
             tanggalNow = tanggalNow.plusDays(Integer.parseInt(splitMessageString[2])); // Menambahkan tanggal sekarang dengan waktu jatuh tempo
             Date tanggalDate = asDate(tanggalNow); // Mengubah object LocalDate ke Date agar bisa masuk ke repository
 
-            String balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
-                    + splitMessageString[2] + " hari, tulis 'lihatutang' tanpa tanda kutip untuk melihat semua utang";
 
             String keterangan = getKeteranganUtang(splitMessageString);
+            String balasan = "";
 
-            Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt, userRepo);
+            // Verify input
+            if (!utangInputVerifier(splitMessageString)) {
+                balasan = "Maaf, perintah tidak dikenali. Mungkin maksud anda \n utang <jumlah utang> <berapa hari " +
+                        "hingga deadline> <deskripsi>. \nTulis \"info\" untuk informasi lebih lanjut ";
+            } else {
+                Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt, userRepo);
 
-            if (!adaUser) {
-                balasan = "Maaf, anda belum terdaftar";
+                if (!adaUser) {
+                    balasan = "Maaf, anda belum terdaftar";
+                } else {
+                    balasan = "Berhasil menambahkan utang sebesar " + splitMessageString[1] + ", jatuh tempo dalam "
+                            + splitMessageString[2] + " hari, tulis 'lihatutang' tanpa tanda kutip untuk melihat semua utang";
+                }
             }
-
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
 
         // lihatutang
-        else if (splitMessageString[0].equals("lihatutang")) {
+        else if (splitMessageString[0].equals("lihatutang") && splitMessageString.length == 1) {
             System.out.println("masuk lihatutang"); // LOG
             String balasan = utangHandler.getUtangUser(userId, repoDebt);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
@@ -144,6 +146,25 @@ public class Controller {
         }
 
 
+    }
+
+    /**
+     * method untuk mengecek apakah input untuk utang sudah benar atau belum
+     * contoh input yang benar
+     * utang <jumlah utang> <tenggat waktu berapa hari> <deskripsi>
+     * utang 500 5 utang ke paijo
+     *
+     * @param strings string input yang akan dicek
+     * @return true jika input tidak ada masalah, false jika input salah
+     */
+    public Boolean utangInputVerifier(String[] strings) {
+        if (strings.length > 2) {
+            if (strings[1].matches("[0-9]+") && strings[2].matches("[0-9]+")) {
+                return Integer.parseInt(strings[1]) > 0 && Integer.parseInt(strings[2]) > 0;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -166,13 +187,12 @@ public class Controller {
     public String tambahAktivitas(String userId, String kategori, int jumlah, String deskripsi, UserRepository repoU, ExpenditureRepository repoE) {
         if (repoU.findByUsername(userId) == null) {
             return "Maaf Anda belom terdaftar";
-        }
-        else if (jumlah < 0){
+        } else if (jumlah < 0) {
             return "Maaf jumlah pengeluaran tidak boleh kurang dari 0";
         } else {
-                User thisUser = repoU.findByUsername(userId);
-                aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, repoE);
-                return "Pengeluaran berhasil di tambah";
+            User thisUser = repoU.findByUsername(userId);
+            aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, repoE);
+            return "Pengeluaran berhasil di tambah";
         }
     }
 
@@ -216,13 +236,15 @@ public class Controller {
         String reply = laporanHandler.showPengeluaranSebulan(username, userRepo, expenseRepo);
         return reply;
     }
-    public boolean kondisiTarget(String username, UserRepository userRepo, ExpenditureRepository expenseRepo){
+
+    public boolean kondisiTarget(String username, UserRepository userRepo, ExpenditureRepository expenseRepo) {
         boolean reply = notifikasiHandler.kondisiTarget(username, userRepo, expenseRepo);
         return reply;
     }
-    public String targetLebih(){
+
+    public String targetLebih() {
         //String reply = notifikasiHandler.targetLebih();
-        return  "Pengeluaran berlebih";
+        return "Pengeluaran berlebih";
     }
 
     public String info() {
@@ -232,7 +254,7 @@ public class Controller {
                 "- tambah pengeluaran\n" +
                 "- laporan\n" +
                 "- daftar\n" +
-                "- histori pengeluaran\n" + 
+                "- histori pengeluaran\n" +
                 "- utang";
     }
 
