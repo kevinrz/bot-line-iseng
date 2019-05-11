@@ -106,12 +106,6 @@ public class Controller {
         // utang 5000 5 aqua ke paijo
         else if (splitMessageString[0].equals("utang")) {
             System.out.println("masuk utang"); // LOG
-            LocalDate tanggalNow = LocalDate.now(); // Mengambil tanggal sekarang
-            tanggalNow = tanggalNow.plusDays(Integer.parseInt(splitMessageString[2])); // Menambahkan tanggal sekarang dengan waktu jatuh tempo
-            Date tanggalDate = asDate(tanggalNow); // Mengubah object LocalDate ke Date agar bisa masuk ke repository
-
-
-            String keterangan = getKeteranganUtang(splitMessageString);
             String balasan = "";
 
             // Verify input
@@ -119,6 +113,14 @@ public class Controller {
                 balasan = "Maaf, perintah tidak dikenali. Mungkin maksud anda \n utang <jumlah utang> <berapa hari " +
                         "hingga deadline> <deskripsi>. \nTulis \"info\" untuk informasi lebih lanjut ";
             } else {
+
+                LocalDate tanggalNow = LocalDate.now(); // Mengambil tanggal sekarang
+                tanggalNow = tanggalNow.plusDays(Integer.parseInt(splitMessageString[2])); // Menambahkan tanggal sekarang dengan waktu jatuh tempo
+                Date tanggalDate = asDate(tanggalNow); // Mengubah object LocalDate ke Date agar bisa masuk ke repository
+
+
+                String keterangan = getKeteranganUtang(splitMessageString);
+
                 Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt, userRepo);
 
                 if (!adaUser) {
