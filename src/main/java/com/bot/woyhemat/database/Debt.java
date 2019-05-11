@@ -33,37 +33,37 @@ public class Debt {
 
     }
 
-    public int getId() {
-        return id;
-    }
+//    public int getId() {
+//        return id;
+//    }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+//    public void setId(int id) {
+//        this.id = id;
+//    }
 
     public int getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
+//    public void setAmount(int amount) {
+//        this.amount = amount;
+//    }
 
     public Date getPeriod() {
         return period;
     }
 
-    public void setPeriod(Date period) {
-        this.period = period;
-    }
+//    public void setPeriod(Date period) {
+//        this.period = period;
+//    }
 
     public User getUser() {
         return user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+//    public void setUser(User user) {
+//        this.user = user;
+//    }
 
     public String getKeterangan() {
         return keterangan;

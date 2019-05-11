@@ -1,5 +1,6 @@
 package com.bot.woyhemat;
 
+import com.bot.woyhemat.database.Debt;
 import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.UserRepository;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -19,44 +19,103 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class WoyHematApplicationTests {
-	UtangHandler utangHandler;
+    UtangHandler utangHandler;
 
-	@Autowired
-	DebtRepository repoUtang;
+    @Autowired
+    DebtRepository repoUtang;
 
-	@Autowired
-	UserRepository repoUser;
+    @Autowired
+    UserRepository repoUser;
 
-	@Before
-	public void setUp() {
-		utangHandler = new UtangHandler();
+    @Before
+    public void setUp() {
+        utangHandler = new UtangHandler();
 
-		repoUser.save(new User("12345", 200, 300));
-	}
-
-
-	@Test
-	public void contextLoads() {
-	}
-
-	@Test
-	public void testTambahUtangWork() {
-		utangHandler.tambahUtang(200, new Date(), repoUser.findById(1).get(), repoUtang);
-		String reportUtang = utangHandler.getUtangUser(repoUser.findByUsername("12345").getUsername(), repoUtang);
+        repoUser.save(new User("12345", 200, 300));
+    }
 
 
-		assertNotNull(reportUtang);
-	}
+    @Test
+    public void contextLoads() {
+    }
 
-	@Test
-	public void testGetUtang() {
-		utangHandler.tambahUtang(200, new Date(), repoUser.findById(1).get(), repoUtang);
-		assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0, 7));
-	}
+    @Test
+    public void testTambahUtangWork() {
+        utangHandler.tambahUtang(200, new Date(), repoUser.findById(1).get(), "test123", repoUtang);
+        String reportUtang = utangHandler.getUtangUser(repoUser.findByUsername("12345").getUsername(), repoUtang);
 
-	@Test
-	public void testNotify() {
-		utangHandler.notifyFacadeNotif();
-	}
+
+        assertNotNull(reportUtang);
+    }
+
+    @Test
+    public void testGetUtang() {
+        utangHandler.tambahUtang(200, new Date(), repoUser.findById(1).get(), "test123", repoUtang);
+        assertEquals("[Utang]", utangHandler.getUtangUser("12345", repoUtang).substring(0, 7));
+    }
+
+    @Test
+    public void testNotify() {
+        utangHandler.notifyFacadeNotif();
+    }
+
+    @Test
+    public void testGetKeteranganUtang() {
+        Controller control = new Controller();
+        String[] testString = new String[]{"utang", "500", "5", "tes", "keterangan"};
+        System.out.println(testString[0]);
+        String hasil = control.getKeteranganUtang(testString);
+        assertEquals("tes keterangan ", hasil);
+    }
+
+    @Test
+    public void testNoUserTambahUtang() {
+        Controller control = new Controller();
+        System.out.println(repoUtang + " asdasdsadsa asdasd asd sa d   ===-=-=-");
+        Boolean hasil = control.tambahUtang(200, new Date(), "abcde", "asd", repoUtang, repoUser);
+        assertFalse(hasil);
+    }
+
+    @Test
+    public void testSalah() {
+        String hasil = new Controller().salah();
+
+        assertEquals("Fitur tidak tersedia", hasil);
+    }
+
+    @Test
+    public void testDateToString() {
+        String hasil = utangHandler.dateToString(new Date(1));
+        System.out.println(hasil);
+        assertEquals("01-01-1970",hasil);
+    }
+
+//    @Test
+//    public void testDataDebtAmount() {
+//
+//        Debt theDebt = new Debt(200, new Date(), new User("aaa", 22, 300));
+//        int theAmt = theDebt.getAmount();
+//        assertEquals(theAmt, 200);
+//    }
+//
+//    @Test
+//    public void testDataDebtKeterangan() {
+//
+//        Debt theDebt = new Debt(200, new Date(), new User("aaa", 22, 300));
+//        String theKeterangan = theDebt.getKeterangan();
+//        assertEquals(theKeterangan, "-");
+//    }
+
+//    @Test
+//    public void testDataDebtKeterangan() {
+//
+//        Debt theUtang = null;
+//        for (Debt d : repoUtang.findAll()) {
+//            theUtang = d;
+//            break;
+//        }
+//
+//        assertEquals(theUtang.getKeterangan(), "test123");
+//    }
 
 }

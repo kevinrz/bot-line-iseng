@@ -27,17 +27,24 @@ build:
 
 test:
   stage: test
-  script: gradle check
+  script:
+    - gradle check
+    - gradle test
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
     paths:
       - build
       - .gradle
+  artifacts:
+    paths:
+      - build/reports/jacoco/
 
 Deployment:
   image: ruby:2.4
   stage: deploy
+  dependencies:
+    - test
   before_script:
     - gem install dpl
     - wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
@@ -45,6 +52,11 @@ Deployment:
     - dpl --provider=heroku --app=$HEROKU_APPNAME --api-key=$HEROKU_APIKEY
     - export HEROKU_API_KEY=$HEROKU_APIKEY
     - heroku run --app $HEROKU_APPNAME migrate
+    - mkdir public
+    - mv build/reports/jacoco/test/html/* public
+  artifacts:
+    paths:
+      - public
   environment:
     name: production
     url: $HEROKU_APP_HOST

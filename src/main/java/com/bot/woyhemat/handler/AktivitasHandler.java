@@ -35,11 +35,8 @@ public class AktivitasHandler extends Handler {
         thisUser.tambahPengeluaranKeTotal(jumlah);
     }
 
-    /**
-     * TODO hapus pengeluaran user, implementasi menunggu database
-     */
-    void hapusPengeluaran() {
-        //TODO
-    }
+//    void hapusPengeluaran() {
+//        //TODO
+//    }
 
 }

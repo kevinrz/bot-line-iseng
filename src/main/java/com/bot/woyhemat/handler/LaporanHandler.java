@@ -5,9 +5,10 @@ import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.ExpenditureRepository;
 import com.bot.woyhemat.database.UserRepository;
 
+import java.time.LocalDate;
 import java.text.SimpleDateFormat;
-import java.util.Observer;
 import java.util.List;
+import java.util.Observer;
 
 import java.lang.NullPointerException;
 
@@ -19,6 +20,7 @@ public class LaporanHandler extends Handler {
 
     public String showPengeluaranSebulan(String userId, UserRepository users, ExpenditureRepository expenses) {
         User thisUser = users.findByUsername(userId);
+        int thisTarget = thisUser.getTarget();
 
         if (thisUser == null) {
             return "Maaf, anda belum terdaftar.";
@@ -36,8 +38,13 @@ public class LaporanHandler extends Handler {
         reply += "Laporan pengeluaran sebulan terakhir: \n";
         
         String lastFormattedDate = "";
+        int currentMonth = LocalDate.now().getMonthValue();
+        System.out.println("current " + currentMonth);
+        System.out.println("data " + thisExpenses.get(0).getTimestamp().getMonth());        
 
         for (int i = 0; i < thisExpenses.size(); i++) {
+            if (thisExpenses.get(i).getTimestamp().getMonth() + 1 != currentMonth) break;
+
             String currentFormattedDate = new SimpleDateFormat("EEEE, dd MMMM yyyy").format(thisExpenses.get(i).getTimestamp());
             String formattedTime = new SimpleDateFormat("HH:mm").format(thisExpenses.get(i).getTimestamp());
 
@@ -54,17 +61,26 @@ public class LaporanHandler extends Handler {
 
             reply += counter + ")";
             reply += "\tKategori: " + thisExpenses.get(i).getCategory();
-            reply += "\n\tDeskripsi: " + thisExpenses.get(i).getDescription();
-            reply += "\n\tJumlah: " + thisExpenses.get(i).getAmount();
-            reply += "\n\tJam: " + formattedTime;
+            reply += "\n\t\tDeskripsi: " + thisExpenses.get(i).getDescription();
+            reply += "\n\t\tJumlah: " + thisExpenses.get(i).getAmount();
+            reply += "\n\t\tJam: " + formattedTime;
             reply += "\n\n";
             total += thisExpenses.get(i).getAmount();
             counter++;
         }
-        reply += "Total pengeluaran bulan ini: " + total;
-        return reply;
+        int selisih = thisTarget - total;
 
-        // TODO BATASI SEBULAN
+        
+        reply += "Total pengeluaran bulan ini: " + total;
+        reply += "\nTarget pengeluaran anda: " + thisTarget;
+
+        if (selisih < 0) {
+            reply += "\n\nTotal pengeluaran anda bulan ini sudah melebihi target anda!";
+        } else {
+            reply += "\n\nSisa pengeluaran yang bisa anda lakukan: " + selisih;
+        }
+
+        return reply;
 
     }
 }

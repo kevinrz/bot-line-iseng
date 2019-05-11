@@ -26,6 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+
 public class ControllerTest{
 
 
@@ -39,6 +40,13 @@ public class ControllerTest{
 
     @Autowired
     ExpenditureRepository repoE;
+
+    @Test
+    public void testTargetCannotBeNegative(){
+        String reply = controller.newUser("qwer", -200, repo);
+        assertEquals(reply,"Maaf target tidak boleh kurang dari 0");
+
+    }
 
 
     @Test
@@ -60,8 +68,43 @@ public class ControllerTest{
         assertNotNull(repoE.findAll());
     }
 
-	// @Test
-	// public void addObserver() throws Exception{
+    @Test
 
-	// }
+    public void testTambahPengeluaranWithoutUser(){
+        String reply = controller.tambahAktivitas("akndn", "makanan", 10000, "ayam goreng", repo, repoE);
+        assertEquals(reply, "Maaf Anda belom terdaftar");
+    }
+
+    @Test
+    public void testJumlahPengeluaranCannotBeNegative(){
+        controller.newUser("aaa", 100000, repo);
+        String reply = controller.tambahAktivitas("aaa","hiburan", -200, "nonton endgame",repo,repoE);
+        assertEquals(reply, "Maaf jumlah pengeluaran tidak boleh kurang dari 0");
+    }
+
+    @Test
+    public void testKategoriInfo(){
+        String reply = controller.kategori();
+        assertEquals(reply, "Pilih satu kategori: \n - Makanan \n - Hiburan \n - Lainnya  \n Seterusnya ketik *kategori yang dipilih* *total pengeluaran* *deskripsi*");
+    }
+
+    public void testSetTarget() {
+        String reply = controller.setTarget(userIdTemp, 1000, repo);
+        assertEquals(reply, "Anda telah menentukan target pengeluaran sebesar 1000");
+    }
+    @Test
+    public void testInfo(){
+        String reply = controller.info();
+        assertEquals(reply, "Berikut fitur-fitur yang terdapat pada WoyHemat! :\n" +
+                "- info\n" +
+                "- target\n" +
+                "- tambah pengeluaran\n" +
+                "- laporan\n" +
+                "- daftar\n" +
+                "- histori pengeluaran\n" + 
+                "- utang");
+    }
+
+
+
 }

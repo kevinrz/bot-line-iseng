@@ -1,5 +1,7 @@
 package com.bot.woyhemat.database;
 
+import org.checkerframework.common.aliasing.qual.Unique;
+
 import javax.persistence.*;
 
 @Entity
@@ -8,7 +10,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-
+    @Unique
     private String username;
     private int target;
     private int totalPengeluaran;
@@ -27,7 +29,8 @@ public class User {
                 "Customer[id=%d, username='%s', target='%d', totalPengeluaran=%d]",
                 id, username, target, totalPengeluaran);
     }
-    public void setTarget(int target){
+
+    public void setTarget(int target) {
         this.target = target;
     }
 
@@ -37,5 +40,9 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public int getTarget() {
+        return target;
     }
 }

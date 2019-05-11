@@ -42,7 +42,7 @@ public class UtangHandler extends Handler {
      * @return semua catatan utang user tersebut dalam bentuk String
      */
     public String getUtangUser(String userId, DebtRepository repo) {
-        System.out.println("jalan getUtanguser"); // LOG
+        System.out.println("jalan getUtanguser "); // LOG
         String balasan = "[Utang] : \n";
         int counter = 1;
         for (Debt debt : repo.findAll()) {
@@ -53,16 +53,12 @@ public class UtangHandler extends Handler {
             if (debt.getUser().getUsername().equals(userId)) {
                 balasan += counter +  ") Jumlah: " + debt.getAmount() + "\n Jatuh Tempo: " + tanggalJatuhTempoString +
                         " \n Keterangan: " + debt.getKeterangan() + "\n";
+                counter++;
             }
-            counter++;
+
         }
         return balasan;
     }
-
-
-
-
-
 
     /**
      * Mengubah object Date jadi string dengan pola dd-mm-yyyy

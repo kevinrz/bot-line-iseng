@@ -5,8 +5,10 @@ import com.bot.woyhemat.database.ExpenditureRepository;
 import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.UserRepository;
 import com.bot.woyhemat.handler.AktivitasHandler;
+import com.bot.woyhemat.handler.HistoriHandler;
 import com.bot.woyhemat.handler.LaporanHandler;
 import com.bot.woyhemat.handler.UtangHandler;
+import com.bot.woyhemat.handler.NotifikasiHandler;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
@@ -35,6 +37,8 @@ public class Controller {
     AktivitasHandler aktivitasHandler = new AktivitasHandler();
     LaporanHandler laporanHandler = new LaporanHandler();
     UtangHandler utangHandler = new UtangHandler();
+    HistoriHandler historiHandler = new HistoriHandler();
+    NotifikasiHandler notifikasiHandler = new NotifikasiHandler();
     @Autowired
     ExpenditureRepository expenseRepo;
 
@@ -65,19 +69,30 @@ public class Controller {
             String reply = kategori();
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
-            // String reply = tambahAktivitas(userId, splitMessageString);
-            // lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
         } else if (splitMessageString[0].equals("makanan") || splitMessageString[0].equals("hiburan") || splitMessageString[0].equals("lainnya")) {
             // example: makanan 10000 Ayam Goreng
             String kategori = splitMessageString[0];
             int jumlah = Integer.parseInt(splitMessageString[1]);
+            boolean pengeluaranLebih = kondisiTarget(userId, userRepo, expenseRepo);
             String deskripsi = "";
+            boolean kondisiTarget = kondisiTarget(userId, userRepo, expenseRepo);
             for (int i = 2; i < splitMessageString.length; i++) {
                 deskripsi += splitMessageString[i];
             }
-            String reply = tambahAktivitas(userId, kategori, jumlah, deskripsi, userRepo, expenses);
-            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
+            if(kondisiTarget==false){
+                String reply = tambahAktivitas(userId, kategori, jumlah, deskripsi, userRepo, expenses);
+                String reply1 = targetLebih();
+                lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
+
+                if(kondisiTarget==true) {
+                    lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply1)));
+                }
+            }
+            else{
+                String reply1 = targetLebih();
+                lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply1)));
+            }
 
         } else if (splitMessageString[0].equals("info")) {
             String reply = info();
@@ -89,7 +104,7 @@ public class Controller {
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
         } else if (splitMessageString[0].equals("target")) {
-            String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]));
+            String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]), userRepo);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
         // utang <jumlah> <Deadline utang dalma hari> <keterangan>
@@ -105,7 +120,11 @@ public class Controller {
 
             String keterangan = getKeteranganUtang(splitMessageString);
 
-            tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt);
+            Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt, userRepo);
+
+            if (adaUser) {
+                balasan = "Maaf, anda belum terdaftar";
+            }
 
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         }
@@ -114,6 +133,10 @@ public class Controller {
         else if (splitMessageString[0].equals("lihatutang")) {
             System.out.println("masuk lihatutang"); // LOG
             String balasan = utangHandler.getUtangUser(userId, repoDebt);
+            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
+        } else if (splitMessageString[0].equals("histori")) {
+            System.out.println("histori"); //Log
+            String balasan = historiHandler.getHistoriPengeluaran(userId, userRepo, expenseRepo, repoDebt);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         } else {
             String reply = salah();
@@ -140,25 +163,27 @@ public class Controller {
     }
 
 
-    //+pengeluaran template = tambah pengeluaran *kategori* *amount* *deskripsi*
-
     public String tambahAktivitas(String userId, String kategori, int jumlah, String deskripsi, UserRepository repoU, ExpenditureRepository repoE) {
         if (repoU.findByUsername(userId) == null) {
             return "Maaf Anda belom terdaftar";
+        }
+        else if (jumlah < 0){
+            return "Maaf jumlah pengeluaran tidak boleh kurang dari 0";
         } else {
-            User thisUser = repoU.findByUsername(userId);
-            aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, repoE);
-            return "Pengeluaran berhasil di tambah";
-
+                User thisUser = repoU.findByUsername(userId);
+                aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, repoE);
+                return "Pengeluaran berhasil di tambah";
         }
     }
+
 
     // register template : daftar *target*
     // eg daftar 1000000
     public String newUser(String userId, int target, UserRepository repo) {
         if (repo.findByUsername(userId) != null) {
-
             return "Maaf Anda sudah terdaftar";
+        } else if (target <= 0) {
+            return "Maaf target tidak boleh kurang dari 0";
         } else {
             User newUser = new User(userId, target, 0);
             repo.save(newUser);
@@ -168,17 +193,33 @@ public class Controller {
 
     // method yang dijalankan ketika menambahkan utang ke suatu user
     // method ini menggunakan utangHandler
-    public void tambahUtang(int jumlah, Date waktu, String username, String keterangan, DebtRepository repo) {
+    public Boolean tambahUtang(int jumlah, Date waktu, String username, String keterangan, DebtRepository repoDebt, UserRepository repoUser) {
+
         System.out.println("JALAN TAMBAH UTANG"); // LOG
-        User theUser = userRepo.findByUsername(username);
+        User theUser = repoUser.findByUsername(username);
+
+        // Jika tidak belum terdaftar, return null
+        if (theUser == null) {
+            return false;
+        }
+
         UtangHandler utangHandlerObj = utangHandler;
-        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, keterangan, repo);
+        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, keterangan, repoDebt);
+        return true;
     }
 
 
     public String showPengeluaranSebulan(String username, UserRepository userRepo, ExpenditureRepository expenseRepo) {
         String reply = laporanHandler.showPengeluaranSebulan(username, userRepo, expenseRepo);
         return reply;
+    }
+    public boolean kondisiTarget(String username, UserRepository userRepo, ExpenditureRepository expenseRepo){
+        boolean reply = notifikasiHandler.kondisiTarget(username, userRepo, expenseRepo);
+        return reply;
+    }
+    public String targetLebih(){
+        //String reply = notifikasiHandler.targetLebih();
+        return  "Pengeluaran berlebih";
     }
 
     public String info() {
@@ -187,7 +228,9 @@ public class Controller {
                 "- target\n" +
                 "- tambah pengeluaran\n" +
                 "- laporan\n" +
-                "- daftar\n";
+                "- daftar\n" +
+                "- histori pengeluaran\n" + 
+                "- utang";
     }
 
     public String infoTambah() {
@@ -206,8 +249,8 @@ public class Controller {
         return "Fitur tidak tersedia";
     }
 
-    public String setTarget(String userId, int jumlah) {
-        User user = userRepo.findByUsername(userId);
+    public String setTarget(String userId, int jumlah, UserRepository userRepository) {
+        User user = userRepository.findByUsername(userId);
         user.setTarget(jumlah);
         return "Anda telah menentukan target pengeluaran sebesar " + jumlah;
     }
