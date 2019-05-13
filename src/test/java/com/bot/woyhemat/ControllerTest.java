@@ -95,7 +95,7 @@ public class ControllerTest {
 
     @Test
     public void testTargetCannotBeNegative() {
-        String reply = controller.newUser("qwer", -200, repo);
+        String reply = controller.newUser("qwer", -200);
         assertEquals(reply, "Maaf target tidak boleh kurang dari 0");
 
     }
@@ -103,34 +103,34 @@ public class ControllerTest {
 
     @Test
     public void testSaveUser() {
-        controller.newUser(userIdTemp, 1000, repo);
+        controller.newUser(userIdTemp, 1000);
         assertNotNull(repo.findAll());
     }
 
     @Test
     public void testSaveUserAlreadyRegistered() {
-        String reply = controller.newUser(userIdTemp, 1000, repo);
-        String reply2 = controller.newUser(userIdTemp, 1000, repo);
+        String reply = controller.newUser(userIdTemp, 1000);
+        String reply2 = controller.newUser(userIdTemp, 1000);
         assertEquals(reply2, "Maaf Anda sudah terdaftar");
     }
 
     @Test
     public void testTambahPengeluaran() {
-        controller.tambahAktivitas(userIdTemp, "makanan", 1000, "ayam goreng", repo, repoE);
+        controller.tambahAktivitas(userIdTemp, "makanan", 1000, "ayam goreng");
         assertNotNull(repoE.findAll());
     }
 
     @Test
 
     public void testTambahPengeluaranWithoutUser() {
-        String reply = controller.tambahAktivitas("akndn", "makanan", 10000, "ayam goreng", repo, repoE);
+        String reply = controller.tambahAktivitas("akndn", "makanan", 10000, "ayam goreng");
         assertEquals(reply, "Maaf Anda belom terdaftar");
     }
 
     @Test
     public void testJumlahPengeluaranCannotBeNegative() {
-        controller.newUser("aaa", 100000, repo);
-        String reply = controller.tambahAktivitas("aaa", "hiburan", -200, "nonton endgame", repo, repoE);
+        controller.newUser("aaa", 100000);
+        String reply = controller.tambahAktivitas("aaa", "hiburan", -200, "nonton endgame");
         assertEquals(reply, "Maaf jumlah pengeluaran tidak boleh kurang dari 0");
     }
 
@@ -141,7 +141,7 @@ public class ControllerTest {
     }
 
     public void testSetTarget() {
-        String reply = controller.setTarget(userIdTemp, 1000, repo);
+        String reply = controller.setTarget(userIdTemp, 1000);
         assertEquals(reply, "Anda telah menentukan target pengeluaran sebesar 1000");
     }
 
@@ -189,7 +189,9 @@ public class ControllerTest {
 
         controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
                 new TextMessageContent("123", "info"), Instant.now()));
-        String compare = outContent.toString().split("#")[1].trim().replace("\n", "");
+        String[] compareList = outContent.toString().split("#");
+        int lastElement = compareList.length - 1;
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
         String expected = "Berikut fitur-fitur yang terdapat pada WoyHemat! " +
                 ":- info- target- tambah pengeluaran- laporan- daftar- histori pengeluaran- utang";
 
@@ -198,12 +200,31 @@ public class ControllerTest {
 
 
     }
+
+    @Test
+    public void testEventCommandSalah() {
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "salahwoy"), Instant.now()));
+        String[] compareList = outContent.toString().split("#");
+        int lastElement = compareList.length - 1;
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
+        String expected = "Fitur tidak tersedia";
+
+        System.err.println(outContent.toString());
+        assertEquals(expected, compare);
+
+
+    }
+
     @Test
     public void testEventUtangSalah() {
 
         controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
                 new TextMessageContent("123", "utang -1 -2"), Instant.now()));
-        String compare = outContent.toString().split("#")[1].trim().replace("\n", "");
+        String[] compareList = outContent.toString().split("#");
+        int lastElement = compareList.length - 1;
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
 
         String expected = "Maaf, perintah tidak dikenali. Mungkin maksud anda  utang <jumlah utang> " +
                 "<berapa hari hingga deadline> <deskripsi>. Tulis \"info\" untuk informasi lebih lanjut";
@@ -219,7 +240,9 @@ public class ControllerTest {
 
         controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceBelumDaftar,
                 new TextMessageContent("123", "utang 1 2"), Instant.now()));
-        String compare = outContent.toString().split("#")[1].trim().replace("\n", "");
+        String[] compareList = outContent.toString().split("#");
+        int lastElement = compareList.length - 1;
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
 
         String expected = "Maaf, anda belum terdaftar";
 
@@ -237,7 +260,9 @@ public class ControllerTest {
 
         controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
                 new TextMessageContent("123", "utang 10 3"), Instant.now()));
-        String compare = outContent.toString().split("#")[1].trim().replace("\n", "");
+        String[] compareList = outContent.toString().split("#");
+        int lastElement = compareList.length - 1;
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
 
         String expected = "Berhasil menambahkan utang sebesar 10, jatuh tempo dalam 3 hari, tulis" +
                 " 'lihatutang' tanpa tanda kutip untuk melihat semua utang";
@@ -256,7 +281,9 @@ public class ControllerTest {
 
         controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
                 new TextMessageContent("123", "utang -10 -3"), Instant.now()));
-        String compare = outContent.toString().split("#")[1].trim().replace("\n", "");
+        String[] compareList = outContent.toString().split("#");
+        int lastElement = compareList.length - 1;
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
 
         String expected = "Maaf, perintah tidak dikenali. Mungkin maksud anda  utang <jumlah utang> " +
                 "<berapa hari hingga deadline> <deskripsi>. Tulis \"info\" untuk informasi lebih lanjut";
@@ -281,10 +308,9 @@ public class ControllerTest {
 
         String[] compareList = outContent.toString().split("#");
         int lastElement = compareList.length - 1;
-
         String compare = compareList[lastElement - 1].trim().replace("\n", "");
 
-        String expected = "[Utang] : 1) Jumlah: 10 Jatuh Tempo: 14-05-2019  Keterangan:";
+        String expected = "[Utang] : 1) Jumlah: 10 Jatuh Tempo: 16-05-2019  Keterangan:";
 
         System.err.println(outContent.toString());
         assertEquals(expected, compare);

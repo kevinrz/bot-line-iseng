@@ -1,9 +1,6 @@
 package com.bot.woyhemat;
 
-import com.bot.woyhemat.database.DebtRepository;
-import com.bot.woyhemat.database.ExpenditureRepository;
-import com.bot.woyhemat.database.User;
-import com.bot.woyhemat.database.UserRepository;
+import com.bot.woyhemat.database.*;
 import com.bot.woyhemat.handler.*;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
@@ -13,6 +10,7 @@ import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.SingletonBeanRegistry;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -20,12 +18,12 @@ import java.util.Date;
 
 @LineMessageHandler
 public class Controller {
-    @Autowired
-    public UserRepository userRepo;
-    @Autowired
-    public DebtRepository repoDebt;
-    @Autowired
-    public ExpenditureRepository expenses;
+//    @Autowired
+//    public UserRepository userRepo;
+//    @Autowired
+//    public DebtRepository repoDebt;
+//    @Autowired
+//    public ExpenditureRepository expenses;
     //handlers
     @Autowired
     LineMessagingClient lineMessagingClient;
@@ -35,12 +33,15 @@ public class Controller {
     UtangHandler utangHandler = new UtangHandler();
     HistoriHandler historiHandler = new HistoriHandler();
     NotifikasiHandler notifikasiHandler = new NotifikasiHandler();
-    @Autowired
-    ExpenditureRepository expenseRepo;
+//    @Autowired
+//    ExpenditureRepository expenseRepo;
 
     // Buat di Test
     @Autowired
     Controller control;
+
+    @Autowired
+    DatabaseCollection database;
 
 
     /**
@@ -56,7 +57,6 @@ public class Controller {
     @EventMapping
     public void messageEventHandleText(MessageEvent<TextMessageContent> event) {
 
-
         System.out.println("JALAN OI"); //LOG
         String userId = event.getSource().getUserId();
         TextMessageContent message = event.getMessage();
@@ -65,7 +65,7 @@ public class Controller {
         System.out.println(messageString); //LOG
         System.out.println(splitMessageString[0]); //LOG
         if (splitMessageString[0].equals("daftar")) {
-            String reply = newUser(userId, Integer.parseInt(splitMessageString[1]), userRepo);
+            String reply = newUser(userId, Integer.parseInt(splitMessageString[1]));
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
         } else if (splitMessageString[0].equals("tambah") && splitMessageString[1].equals("pengeluaran")) {
@@ -77,14 +77,14 @@ public class Controller {
             // example: makanan 10000 Ayam Goreng
             String kategori = splitMessageString[0];
             int jumlah = Integer.parseInt(splitMessageString[1]);
-            boolean pengeluaranLebih = kondisiTarget(userId, userRepo, expenseRepo);
+            boolean pengeluaranLebih = kondisiTarget(userId);
             String deskripsi = "";
-            boolean kondisiTarget = kondisiTarget(userId, userRepo, expenseRepo);
+            boolean kondisiTarget = kondisiTarget(userId);
             for (int i = 2; i < splitMessageString.length; i++) {
                 deskripsi += splitMessageString[i];
             }
             if (kondisiTarget == false) {
-                String reply = tambahAktivitas(userId, kategori, jumlah, deskripsi, userRepo, expenses);
+                String reply = tambahAktivitas(userId, kategori, jumlah, deskripsi);
                 String reply1 = targetLebih();
                 lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
@@ -104,11 +104,11 @@ public class Controller {
 
 
         } else if (splitMessageString[0].equals("laporan")) {
-            String reply = showPengeluaranSebulan(userId, userRepo, expenseRepo);
+            String reply = showPengeluaranSebulan(userId);
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
 
         } else if (splitMessageString[0].equals("target")) {
-            String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]), userRepo);
+            String reply = setTarget(userId, Integer.parseInt(splitMessageString[1]));
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
         // utang <jumlah> <Deadline utang dalma hari> <keterangan>
@@ -130,7 +130,7 @@ public class Controller {
 
                 String keterangan = getKeteranganUtang(splitMessageString);
 
-                Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan, repoDebt, userRepo);
+                Boolean adaUser = tambahUtang(Integer.parseInt(splitMessageString[1]), tanggalDate, userId, keterangan);
 
                 if (!adaUser) {
                     balasan = "Maaf, anda belum terdaftar";
@@ -146,15 +146,16 @@ public class Controller {
         // lihatutang
         else if (splitMessageString[0].equals("lihatutang") && splitMessageString.length == 1) {
             System.out.println("masuk lihatutang"); // LOG
-            String balasan = utangHandler.getUtangUser(userId, repoDebt);
+            String balasan = utangHandler.getUtangUser(userId, database.getRepoDebtInstance());
             System.out.println("#" + balasan + "#");
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         } else if (splitMessageString[0].equals("histori")) {
             System.out.println("histori"); //Log
-            String balasan = historiHandler.getHistoriPengeluaran(userId, userRepo, expenseRepo, repoDebt);
+            String balasan = historiHandler.getHistoriPengeluaran(userId, database.getRepoUserInstance(), database.getRepoExpenditureInstance(), database.getRepoDebtInstance());
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
         } else {
             String reply = salah();
+            System.out.println("#" + reply + "#");
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(reply)));
         }
 
@@ -197,14 +198,14 @@ public class Controller {
     }
 
 
-    public String tambahAktivitas(String userId, String kategori, int jumlah, String deskripsi, UserRepository repoU, ExpenditureRepository repoE) {
-        if (repoU.findByUsername(userId) == null) {
+    public String tambahAktivitas(String userId, String kategori, int jumlah, String deskripsi) {
+        if (database.getRepoUserInstance().findByUsername(userId) == null) {
             return "Maaf Anda belom terdaftar";
         } else if (jumlah < 0) {
             return "Maaf jumlah pengeluaran tidak boleh kurang dari 0";
         } else {
-            User thisUser = repoU.findByUsername(userId);
-            aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, repoE);
+            User thisUser = database.getRepoUserInstance().findByUsername(userId);
+            aktivitasHandler.tambahPengeluaran(userId, kategori, jumlah, deskripsi, thisUser, database.getRepoExpenditureInstance());
             return "Pengeluaran berhasil di tambah";
         }
     }
@@ -212,24 +213,24 @@ public class Controller {
 
     // register template : daftar *target*
     // eg daftar 1000000
-    public String newUser(String userId, int target, UserRepository repo) {
-        if (repo.findByUsername(userId) != null) {
+    public String newUser(String userId, int target) {
+        if (database.getRepoUserInstance().findByUsername(userId) != null) {
             return "Maaf Anda sudah terdaftar";
         } else if (target <= 0) {
             return "Maaf target tidak boleh kurang dari 0";
         } else {
             User newUser = new User(userId, target, 0);
-            repo.save(newUser);
+            database.getRepoUserInstance().save(newUser);
             return "Anda telah terdaftar!";
         }
     }
 
     // method yang dijalankan ketika menambahkan utang ke suatu user
     // method ini menggunakan utangHandler
-    public Boolean tambahUtang(int jumlah, Date waktu, String username, String keterangan, DebtRepository repoDebt, UserRepository repoUser) {
+    public Boolean tambahUtang(int jumlah, Date waktu, String username, String keterangan) {
 
         System.out.println("JALAN TAMBAH UTANG"); // LOG
-        User theUser = repoUser.findByUsername(username);
+        User theUser = database.getRepoUserInstance().findByUsername(username);
 
         // Jika tidak belum terdaftar, return null
         if (theUser == null) {
@@ -238,20 +239,20 @@ public class Controller {
         }
 
         UtangHandler utangHandlerObj = utangHandler;
-        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, keterangan, repoDebt);
+        utangHandlerObj.tambahUtang(jumlah, waktu, theUser, keterangan, database.getRepoDebtInstance());
         System.out.println("USER NOT NULL"); // LOG
         System.out.println(theUser);
         return true;
     }
 
 
-    public String showPengeluaranSebulan(String username, UserRepository userRepo, ExpenditureRepository expenseRepo) {
-        String reply = laporanHandler.showPengeluaranSebulan(username, userRepo, expenseRepo);
+    public String showPengeluaranSebulan(String username ) {
+        String reply = laporanHandler.showPengeluaranSebulan(username, database.getRepoUserInstance(), database.getRepoExpenditureInstance());
         return reply;
     }
 
-    public boolean kondisiTarget(String username, UserRepository userRepo, ExpenditureRepository expenseRepo) {
-        boolean reply = notifikasiHandler.kondisiTarget(username, userRepo, expenseRepo);
+    public boolean kondisiTarget(String username) {
+        boolean reply = notifikasiHandler.kondisiTarget(username, database.getRepoUserInstance(), database.getRepoExpenditureInstance());
         return reply;
     }
 
@@ -287,8 +288,8 @@ public class Controller {
         return "Fitur tidak tersedia";
     }
 
-    public String setTarget(String userId, int jumlah, UserRepository userRepository) {
-        User user = userRepository.findByUsername(userId);
+    public String setTarget(String userId, int jumlah) {
+        User user = database.getRepoUserInstance().findByUsername(userId);
         user.setTarget(jumlah);
         return "Anda telah menentukan target pengeluaran sebesar " + jumlah;
     }
