@@ -1,22 +1,15 @@
 package com.bot.woyhemat.handler;
 
 import com.bot.woyhemat.database.Expenditure;
-import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.ExpenditureRepository;
+import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.database.UserRepository;
 
-import java.time.LocalDate;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Observer;
 
-import java.lang.NullPointerException;
-
-public class LaporanHandler extends Handler {
-
-    @Override
-    void notifyFacadeNotif() {
-    }
+public class LaporanHandler {
 
     public String showPengeluaranSebulan(String userId, UserRepository users, ExpenditureRepository expenses) {
         User thisUser = users.findByUsername(userId);
@@ -36,11 +29,11 @@ public class LaporanHandler extends Handler {
         int total = 0;
         int counter = 1;
         reply += "Laporan pengeluaran sebulan terakhir: \n";
-        
+
         String lastFormattedDate = "";
         int currentMonth = LocalDate.now().getMonthValue();
         System.out.println("current " + currentMonth);
-        System.out.println("data " + thisExpenses.get(0).getTimestamp().getMonth());        
+        System.out.println("data " + thisExpenses.get(0).getTimestamp().getMonth());
 
         for (int i = 0; i < thisExpenses.size(); i++) {
             if (thisExpenses.get(i).getTimestamp().getMonth() + 1 != currentMonth) break;
@@ -70,7 +63,7 @@ public class LaporanHandler extends Handler {
         }
         int selisih = thisTarget - total;
 
-        
+
         reply += "Total pengeluaran bulan ini: " + total;
         reply += "\nTarget pengeluaran anda: " + thisTarget;
 

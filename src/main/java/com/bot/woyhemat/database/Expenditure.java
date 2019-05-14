@@ -17,7 +17,8 @@ public class Expenditure {
     @ManyToOne
     private User user;
 
-    protected Expenditure() {}
+    protected Expenditure() {
+    }
 
     public Expenditure(String category, String description, Timestamp timestamp, int amount, User user) {
         this.category = category;
@@ -34,6 +35,7 @@ public class Expenditure {
     public String getDescription() {
         return description;
     }
+
     public Timestamp getTimestamp() {
         return timestamp;
     }

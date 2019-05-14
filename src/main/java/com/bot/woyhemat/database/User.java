@@ -2,7 +2,10 @@ package com.bot.woyhemat.database;
 
 import org.checkerframework.common.aliasing.qual.Unique;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Entity
 public class User {
@@ -15,7 +18,8 @@ public class User {
     private int target;
     private int totalPengeluaran;
 
-    protected User() {}
+    protected User() {
+    }
 
     public User(String username, int target, int totalPengeluaran) {
         this.username = username;
@@ -30,11 +34,7 @@ public class User {
                 id, username, target, totalPengeluaran);
     }
 
-    public void setTarget(int target) {
-        this.target = target;
-    }
-
-    public void tambahPengeluaranKeTotal(int amount){
+    public void tambahPengeluaranKeTotal(int amount) {
         this.totalPengeluaran = this.totalPengeluaran + amount;
     }
 
@@ -44,5 +44,9 @@ public class User {
 
     public int getTarget() {
         return target;
+    }
+
+    public void setTarget(int target) {
+        this.target = target;
     }
 }

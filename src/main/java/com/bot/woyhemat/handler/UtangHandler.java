@@ -5,6 +5,7 @@ import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -13,13 +14,7 @@ import java.util.Date;
  *
  * @author Kevin Raikhan Zain
  */
-public class UtangHandler extends Handler {
-
-
-    @Override
-    public void notifyFacadeNotif() {
-
-    }
+public class UtangHandler {
 
     /**
      * Menambahkan objek Debt ke DebtRepository
@@ -34,42 +29,29 @@ public class UtangHandler extends Handler {
         repo.save(utang);
     }
 
-    /**
-     * Menampilkan semua utang yang dimiliki user
-     *
-     * @param userId user id akun line
-     * @param repo   objek DebtRepository repo yang di pass dari controller
-     * @return semua catatan utang user tersebut dalam bentuk String
-     */
-    public String getUtangUser(String userId, DebtRepository repo) {
-        System.out.println("jalan getUtanguser "); // LOG
-        String balasan = "[Utang] : \n";
+
+
+    public void hapusUtang(Debt debt, DebtRepository repo) {
+        repo.delete(debt);
+    }
+
+    public ArrayList<Debt> getUtangUserArray(String userId, DebtRepository repo) {
+
+        ArrayList<Debt> debts = new ArrayList<>();
         int counter = 1;
         for (Debt debt : repo.findAll()) {
             System.out.println("Loop getUtangUser"); // LOG
 
-            String tanggalJatuhTempoString = dateToString(debt.getPeriod());
-
             if (debt.getUser().getUsername().equals(userId)) {
-                balasan += counter +  ") Jumlah: " + debt.getAmount() + "\n Jatuh Tempo: " + tanggalJatuhTempoString +
-                        " \n Keterangan: " + debt.getKeterangan() + "\n";
+                debts.add(debt);
                 counter++;
             }
 
         }
-        return balasan;
+        return debts;
     }
 
-    /**
-     * Mengubah object Date jadi string dengan pola dd-mm-yyyy
-     *
-     * @param date object date yang akan diubah
-     * @return string date yang sudah diubah
-     */
-    public String dateToString(Date date) {
-        String hasil = new SimpleDateFormat("dd-MM-yyyy").format(date);
-        return hasil;
-    }
+
 
 
 }

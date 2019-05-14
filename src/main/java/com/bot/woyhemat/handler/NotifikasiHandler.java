@@ -7,16 +7,13 @@ import com.bot.woyhemat.database.UserRepository;
 
 import java.util.List;
 
-public class NotifikasiHandler extends Handler {
-    @Override
-    void notifyFacadeNotif() {
-    }
+public class NotifikasiHandler {
 
-    public String targetLebih(){
+    public String targetLebih() {
         return "Pengeluaran sudah melebihi target";
     }
 
-    public boolean kondisiTarget(String userId, UserRepository users, ExpenditureRepository expenses){
+    public boolean kondisiTarget(String userId, UserRepository users, ExpenditureRepository expenses) {
         User thisUser = users.findByUsername(userId);
         int thisTarget = thisUser.getTarget();
 
@@ -26,10 +23,7 @@ public class NotifikasiHandler extends Handler {
         for (int i = 0; i < thisExpenses.size(); i++) {
             total += thisExpenses.get(i).getAmount();
         }
-        if (total > thisTarget){
-            return true;
-        }
-        return false;
+        return total > thisTarget;
 
     }
 

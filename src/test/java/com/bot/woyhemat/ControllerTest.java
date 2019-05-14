@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.Instant;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -309,15 +310,106 @@ public class ControllerTest {
         String[] compareList = outContent.toString().split("#");
         int lastElement = compareList.length - 1;
         String compare = compareList[lastElement - 1].trim().replace("\n", "");
+        String comparePreDate = compare.substring(0, 37);
 
-        String expected = "[Utang] : 1) Jumlah: 10 Jatuh Tempo: 16-05-2019  Keterangan:";
+
+        String expectedPreDate = "[Utang] : 1) Jumlah: 10 Jatuh Tempo: ";
+//        String a = compare.substring(0, 30);
 
         System.err.println(outContent.toString());
-        assertEquals(expected, compare);
+        assertEquals(comparePreDate, expectedPreDate);
 
 
     }
 
+    @Test
+    public void testDateToString() {
+        String hasil = controller.dateToString(new Date(1));
+        System.out.println(hasil);
+        assertEquals("01-01-1970", hasil);
+    }
+
+    @Test
+    public void testCobaHapusUtangBerhasil() {
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "daftar 25000"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "utang 10 3 satu"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "utang 20 2 dua"), Instant.now()));
+
+        controller.hapusUtang(1, "123");
+        String[] compareList = outContent.toString().split("&");
+        int lastElement = compareList.length - 1;
+
+
+
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
+
+        String expected = "dua";
+
+        System.err.println(outContent.toString());
+        assertEquals(expected, compare);
+    }
+
+    @Test
+    public void testCobaHapusUtangWithMessageBerhasil() {
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "daftar 25000"), Instant.now()));
+
+//        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+//                new TextMessageContent("123", "utang 10 3 tiga"), Instant.now()));
+//
+//        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+//                new TextMessageContent("123", "utang 20 2 empat"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "hapusutang 1"), Instant.now()));
+
+
+        String[] compareList = outContent.toString().split("&");
+        int lastElement = compareList.length - 1;
+
+
+
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
+
+        String expected = "dua";
+
+        System.err.println(outContent.toString());
+        assertEquals(expected, compare);
+    }
+
+    @Test
+    public void testCobaHapusUtangWithMessageSalahNoUtang() {
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "daftar 25000"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "utang 10 3 satu"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "utang 20 2 dua"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+                new TextMessageContent("123", "hapusutang 99"), Instant.now()));
+
+
+        String[] compareList = outContent.toString().split("&");
+        int lastElement = compareList.length - 1;
+
+
+
+        String compare = compareList[lastElement - 1].trim().replace("\n", "");
+
+        String expected = "Tidak ada utang dengan nomor 99";
+
+        System.err.println(outContent.toString());
+        assertEquals(expected, compare);
+    }
 
 
 }

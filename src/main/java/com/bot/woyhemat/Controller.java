@@ -1,6 +1,8 @@
 package com.bot.woyhemat;
 
-import com.bot.woyhemat.database.*;
+import com.bot.woyhemat.database.DatabaseCollection;
+import com.bot.woyhemat.database.Debt;
+import com.bot.woyhemat.database.User;
 import com.bot.woyhemat.handler.*;
 import com.linecorp.bot.client.LineMessagingClient;
 import com.linecorp.bot.model.ReplyMessage;
@@ -10,20 +12,16 @@ import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.SingletonBeanRegistry;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 
 @LineMessageHandler
 public class Controller {
-//    @Autowired
-//    public UserRepository userRepo;
-//    @Autowired
-//    public DebtRepository repoDebt;
-//    @Autowired
-//    public ExpenditureRepository expenses;
+
     //handlers
     @Autowired
     LineMessagingClient lineMessagingClient;
@@ -56,6 +54,7 @@ public class Controller {
 
     @EventMapping
     public void messageEventHandleText(MessageEvent<TextMessageContent> event) {
+
 
         System.out.println("JALAN OI"); //LOG
         String userId = event.getSource().getUserId();
@@ -146,10 +145,23 @@ public class Controller {
         // lihatutang
         else if (splitMessageString[0].equals("lihatutang") && splitMessageString.length == 1) {
             System.out.println("masuk lihatutang"); // LOG
-            String balasan = utangHandler.getUtangUser(userId, database.getRepoDebtInstance());
-            System.out.println("#" + balasan + "#");
+            ArrayList<Debt> debts = utangHandler.getUtangUserArray(userId, database.getRepoDebtInstance());
+
+            String balasan = lihatUtang(debts, userId);
+            System.out.println("#" + balasan + "#"); // Untuk test
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
-        } else if (splitMessageString[0].equals("histori")) {
+        }
+        else if (splitMessageString[0].equals("hapusutang") && splitMessageString.length == 2) {
+            if (splitMessageString[1].matches("[0-9]+")) {
+                String balasan = hapusUtang(Integer.parseInt(splitMessageString[1]), userId);
+                lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
+            }
+
+
+
+
+        }
+        else if (splitMessageString[0].equals("histori")) {
             System.out.println("histori"); //Log
             String balasan = historiHandler.getHistoriPengeluaran(userId, database.getRepoUserInstance(), database.getRepoExpenditureInstance(), database.getRepoDebtInstance());
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
@@ -189,9 +201,13 @@ public class Controller {
      * @return akan me return string "beli aqua dari paijo belom bayar"
      */
     public String getKeteranganUtang(String[] string) {
-        String hasil = "";
+        String hasil = "-";
         for (int i = 3; i < string.length; i++) {
             hasil += string[i] + " ";
+        }
+
+        if (!hasil.equals("-")) {
+            hasil = hasil.substring(1);
         }
 
         return hasil;
@@ -225,6 +241,35 @@ public class Controller {
         }
     }
 
+    public String lihatUtang(ArrayList<Debt> debts, String userId) {
+        int counter = 1;
+        String balasan = "[Utang] : \n";
+        for (Debt debt : debts) {
+            System.out.println("Loop getUtangUser"); // LOG
+
+            String tanggalJatuhTempoString = dateToString(debt.getPeriod());
+
+            if (debt.getUser().getUsername().equals(userId)) {
+                balasan += counter + ") Jumlah: " + debt.getAmount() + "\n Jatuh Tempo: " + tanggalJatuhTempoString +
+                        " \n Keterangan: " + debt.getKeterangan() + "\n";
+                counter++;
+            }
+
+        }
+        return balasan;
+    }
+
+    /**
+     * Mengubah object Date jadi string dengan pola dd-mm-yyyy
+     *
+     * @param date object date yang akan diubah
+     * @return string date yang sudah diubah
+     */
+    public String dateToString(Date date) {
+        String hasil = new SimpleDateFormat("dd-MM-yyyy").format(date);
+        return hasil;
+    }
+
     // method yang dijalankan ketika menambahkan utang ke suatu user
     // method ini menggunakan utangHandler
     public Boolean tambahUtang(int jumlah, Date waktu, String username, String keterangan) {
@@ -245,8 +290,26 @@ public class Controller {
         return true;
     }
 
+    public String hapusUtang(int number, String userId) {
+        User theUser = database.getRepoUserInstance().findByUsername(userId);
+        ArrayList<Debt> utangs = utangHandler.getUtangUserArray(theUser.getUsername(), database.getRepoDebtInstance());
 
-    public String showPengeluaranSebulan(String username ) {
+        if (number > utangs.size() || number < 0) {
+            System.out.println("&Tidak ada utang dengan nomor " + number + "&"); // LOG
+            return "Tidak ada utang dengan nomor " + number;
+        }
+
+        number--;
+        Debt deleteDebt = utangs.get(number);
+
+
+        utangHandler.hapusUtang(deleteDebt, database.getRepoDebtInstance());
+        System.out.println("&" + utangHandler.getUtangUserArray(theUser.getUsername(), database.getRepoDebtInstance()).get(0).getKeterangan() + "&"); // LOG
+        return "Utang berhasil dihapus";
+    }
+
+
+    public String showPengeluaranSebulan(String username) {
         String reply = laporanHandler.showPengeluaranSebulan(username, database.getRepoUserInstance(), database.getRepoExpenditureInstance());
         return reply;
     }
@@ -297,6 +360,8 @@ public class Controller {
     public String kategori() {
         return "Pilih satu kategori: \n - Makanan \n - Hiburan \n - Lainnya  \n Seterusnya ketik *kategori yang dipilih* *total pengeluaran* *deskripsi*";
     }
+
+
 
 
 }

@@ -16,7 +16,8 @@ public class Debt {
     @ManyToOne
     private User user;
 
-    protected Debt() {}
+    protected Debt() {
+    }
 
 
     public Debt(int amount, Date period, User user, String keterangan) {
