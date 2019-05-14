@@ -150,18 +150,19 @@ public class Controller {
             String balasan = lihatUtang(debts, userId);
             System.out.println("#" + balasan + "#"); // Untuk test
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
-        }
-        else if (splitMessageString[0].equals("hapusutang") && splitMessageString.length == 2) {
+        } else if (splitMessageString[0].equals("hapusutang") && splitMessageString.length == 2) {
+            String balasan = "";
             if (splitMessageString[1].matches("[0-9]+")) {
-                String balasan = hapusUtang(Integer.parseInt(splitMessageString[1]), userId);
-                lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
+                balasan = hapusUtang(Integer.parseInt(splitMessageString[1]), userId);
+
+            } else {
+                balasan = "Maaf perintah hapusutang salah, seharusnya hapusutang <no utang>";
             }
 
+            lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
 
 
-
-        }
-        else if (splitMessageString[0].equals("histori")) {
+        } else if (splitMessageString[0].equals("histori")) {
             System.out.println("histori"); //Log
             String balasan = historiHandler.getHistoriPengeluaran(userId, database.getRepoUserInstance(), database.getRepoExpenditureInstance(), database.getRepoDebtInstance());
             lineMessagingClient.replyMessage(new ReplyMessage(event.getReplyToken(), new TextMessage(balasan)));
@@ -360,8 +361,6 @@ public class Controller {
     public String kategori() {
         return "Pilih satu kategori: \n - Makanan \n - Hiburan \n - Lainnya  \n Seterusnya ketik *kategori yang dipilih* *total pengeluaran* *deskripsi*";
     }
-
-
 
 
 }

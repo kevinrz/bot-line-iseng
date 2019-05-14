@@ -69,6 +69,30 @@ public class ControllerTest {
         }
     };
 
+    Source mockSourceHapusUtang1 = new Source() {
+        @Override
+        public String getUserId() {
+            return "233";
+        }
+
+        @Override
+        public String getSenderId() {
+            return "789";
+        }
+    };
+
+    Source mockSourceHapusUtang2 = new Source() {
+        @Override
+        public String getUserId() {
+            return "322";
+        }
+
+        @Override
+        public String getSenderId() {
+            return "789";
+        }
+    };
+
     @Autowired
     UserRepository repo;
 
@@ -331,19 +355,18 @@ public class ControllerTest {
 
     @Test
     public void testCobaHapusUtangBerhasil() {
-        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang1,
                 new TextMessageContent("123", "daftar 25000"), Instant.now()));
 
-        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang1,
                 new TextMessageContent("123", "utang 10 3 satu"), Instant.now()));
 
-        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang1,
                 new TextMessageContent("123", "utang 20 2 dua"), Instant.now()));
 
-        controller.hapusUtang(1, "123");
+        controller.hapusUtang(1, "233");
         String[] compareList = outContent.toString().split("&");
         int lastElement = compareList.length - 1;
-
 
 
         String compare = compareList[lastElement - 1].trim().replace("\n", "");
@@ -357,27 +380,29 @@ public class ControllerTest {
     @Test
     public void testCobaHapusUtangWithMessageBerhasil() {
 
-        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang2,
                 new TextMessageContent("123", "daftar 25000"), Instant.now()));
 
-//        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
-//                new TextMessageContent("123", "utang 10 3 tiga"), Instant.now()));
-//
-//        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
-//                new TextMessageContent("123", "utang 20 2 empat"), Instant.now()));
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang2,
+                new TextMessageContent("123", "utang 10 3 satu"), Instant.now()));
 
-        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceSudahDaftar,
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang2,
+                new TextMessageContent("123", "utang 20 2 dua"), Instant.now()));
+
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang2,
                 new TextMessageContent("123", "hapusutang 1"), Instant.now()));
 
+        controller.messageEventHandleText(new MessageEvent<>("1234", mockSourceHapusUtang2,
+                new TextMessageContent("123", "lihatutang"), Instant.now()));
 
-        String[] compareList = outContent.toString().split("&");
+
+        String[] compareList = outContent.toString().split("#");
         int lastElement = compareList.length - 1;
-
 
 
         String compare = compareList[lastElement - 1].trim().replace("\n", "");
 
-        String expected = "dua";
+        String expected = "[Utang] : 1) Jumlah: 20 Jatuh Tempo: 16-05-2019  Keterangan: dua";
 
         System.err.println(outContent.toString());
         assertEquals(expected, compare);
@@ -400,7 +425,6 @@ public class ControllerTest {
 
         String[] compareList = outContent.toString().split("&");
         int lastElement = compareList.length - 1;
-
 
 
         String compare = compareList[lastElement - 1].trim().replace("\n", "");

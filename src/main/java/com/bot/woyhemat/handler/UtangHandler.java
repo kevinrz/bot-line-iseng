@@ -4,7 +4,6 @@ import com.bot.woyhemat.database.Debt;
 import com.bot.woyhemat.database.DebtRepository;
 import com.bot.woyhemat.database.User;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -30,7 +29,6 @@ public class UtangHandler {
     }
 
 
-
     public void hapusUtang(Debt debt, DebtRepository repo) {
         repo.delete(debt);
     }
@@ -50,8 +48,6 @@ public class UtangHandler {
         }
         return debts;
     }
-
-
 
 
 }
